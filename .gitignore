@@ -5,3 +5,6 @@
 !.gitignore
 !axis-deploy/
 !axis-deploy/**
+
+# Local Netlify folder
+.netlify
