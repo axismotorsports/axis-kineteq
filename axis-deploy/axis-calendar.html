@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kineteq · Bay Calendar</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@page { size: A4 landscape; margin: 8mm 10mm; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;background:#f0f0f0;min-height:100vh;padding:16px}
+
+/* ── PAGE CONTAINER ── */
+.page{width:100%;max-width:1400px;margin:0 auto;background:#fff;
+  padding:clamp(10px,2.5vw,22px) clamp(12px,3vw,28px);
+  box-shadow:0 4px 30px rgba(0,0,0,.12);border-radius:4px}
+
+/* ── HEADER ── */
+.header{display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:clamp(8px,1.5vw,14px);border-bottom:2.5px solid #111;
+  padding-bottom:clamp(6px,1.2vw,12px);flex-wrap:wrap;gap:8px}
+.company{font-size:clamp(7px,1vw,9px);font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:#888;margin-bottom:3px}
+h1{font-size:clamp(18px,3.5vw,28px);font-weight:700;color:#111;letter-spacing:-1px}
+h1 span{color:#E53E3E}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.nav-row{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.nav-btn{background:#111;color:#fff;border:none;padding:clamp(4px,0.8vw,6px) clamp(8px,1.5vw,14px);
+  border-radius:4px;font-size:clamp(9px,1.2vw,12px);font-weight:600;cursor:pointer;
+  letter-spacing:.5px;white-space:nowrap}
+.nav-btn:hover{background:#333}
+.nav-btn.today{background:#E53E3E}
+.bay-label{font-size:clamp(7px,1vw,10px);font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:#888}
+.bay-count{font-size:clamp(14px,2.2vw,20px);font-weight:700;color:#111}
+.refresh-btn{font-size:clamp(7px,1vw,9px);font-weight:600;letter-spacing:1px;color:#888;
+  background:none;border:1px solid #ddd;padding:3px 8px;border-radius:3px;cursor:pointer}
+.refresh-btn:hover{background:#f5f5f5}
+
+/* ── LEGEND ── */
+.legend-bar{display:flex;gap:clamp(6px,1.2vw,12px);margin-bottom:clamp(6px,1.2vw,12px);
+  flex-wrap:wrap;align-items:center}
+.legend-pill{display:flex;align-items:center;gap:4px;font-size:clamp(7px,1vw,9px);
+  font-weight:600;color:#444}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* ── STATUS BAR ── */
+.status-bar{font-size:clamp(8px,1vw,10px);color:#999;letter-spacing:1px;
+  text-align:center;padding:3px 0 8px}
+
+/* ── CALENDAR TABLE ── */
+.calendar{width:100%;border-collapse:collapse;table-layout:fixed}
+.day-header{text-align:center;font-size:clamp(7px,1vw,9px);font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:#999;
+  padding:clamp(3px,.5vw,5px) 0 clamp(5px,.8vw,8px);border-bottom:1px solid #ddd}
+.calendar td{vertical-align:top;border:1px solid #e8e8e8;
+  height:auto;min-height:clamp(70px,10vw,145px);padding:0;position:relative}
+.calendar td.empty{background:#fafafa}
+.calendar td.weekend{background:#fefefe}
+.calendar td.closed{background:#f2f2f2}
+.cell-inner{display:flex;flex-direction:column;height:100%;
+  min-height:clamp(70px,10vw,145px)}
+.cell-date{padding:clamp(3px,.4vw,5px) clamp(3px,.5vw,6px) 2px;
+  flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.date-num{font-size:clamp(9px,1.4vw,13px);font-weight:600;color:#444;line-height:1}
+.calendar td.weekend .date-num{color:#bbb}
+.calendar td.closed .date-num{color:#ccc}
+.cell-body{display:flex;flex-direction:column;flex:1;overflow:hidden;
+  min-height:clamp(50px,7.5vw,110px)}
+.am-half{flex:1;border-bottom:1px dashed #e4e4e4;
+  padding:clamp(1px,.25vw,3px) clamp(2px,.4vw,4px);overflow:hidden}
+.pm-half{flex:1;padding:clamp(1px,.25vw,3px) clamp(2px,.4vw,4px);overflow:hidden}
+.am-label,.pm-label{font-size:clamp(5px,.7vw,7px);font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;color:#ccc;line-height:1;margin-bottom:1px}
+.closed-label{font-size:clamp(5px,.7vw,7px);font-weight:800;letter-spacing:1.2px;
+  text-transform:uppercase;color:#ccc;text-align:center;margin-top:4px}
+
+/* ── JOB BLOCKS ── */
+.job-block{border-radius:3px;padding:clamp(1px,.2vw,3px) clamp(2px,.35vw,4px);
+  font-size:clamp(6px,.9vw,9px);font-weight:500;line-height:1.3;margin-bottom:1px;overflow:hidden}
+.job-id-badge{display:inline-block;background:rgba(0,0,0,.07);border-radius:2px;
+  padding:0 2px;font-size:clamp(5px,.65vw,6px);font-weight:900;letter-spacing:.5px;
+  color:#666;margin-bottom:1px;font-family:monospace}
+.jname{font-size:clamp(7px,1vw,9px);font-weight:700;margin-bottom:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jcar{font-size:clamp(5px,.75vw,7px);opacity:.75;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jtask{font-size:clamp(5px,.7vw,7px);opacity:.65;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jtime{font-size:clamp(5px,.65vw,6.5px);font-weight:700;opacity:.6;margin-top:1px}
+.loc-badge{display:block;border-radius:2px;padding:1px 3px;
+  font-size:clamp(4px,.6vw,6px);font-weight:900;letter-spacing:.5px;
+  text-transform:uppercase;margin-top:1px;text-align:center}
+.mech-badge{display:inline-block;background:rgba(0,0,0,.08);border-radius:2px;
+  padding:0 3px;font-size:clamp(4px,.6vw,6px);font-weight:700;color:#444;
+  margin-top:1px;letter-spacing:.5px}
+.bay-occupied{background:repeating-linear-gradient(45deg,#f8f8f8,#f8f8f8 3px,#efefef 3px,#efefef 6px);
+  border-radius:3px;height:100%;display:flex;align-items:center;justify-content:center}
+.bay-occupied-text{font-size:clamp(5px,.65vw,7px);color:#ccc;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase}
+
+/* ── DETAIL TABLE ── */
+.detail-section{margin-top:clamp(10px,1.8vw,18px)}
+.detail-title{font-size:clamp(7px,1vw,9px);font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;color:#999;margin-bottom:4px;
+  border-bottom:1px solid #eee;padding-bottom:3px}
+.detail-table{width:100%;border-collapse:collapse}
+.detail-table th{font-size:clamp(6px,.85vw,8px);font-weight:700;letter-spacing:.8px;
+  text-transform:uppercase;color:#aaa;text-align:left;padding:3px 6px;border-bottom:1px solid #eee}
+.detail-table td{font-size:clamp(7px,.95vw,9px);color:#333;padding:4px 6px;
+  border-bottom:1px solid #f5f5f5;vertical-align:top}
+.detail-table tr:last-child td{border-bottom:none}
+.color-swatch{display:inline-block;width:8px;height:8px;border-radius:2px;
+  margin-right:4px;vertical-align:middle}
+
+/* ── FOOTER ── */
+.footer{margin-top:clamp(8px,1.5vw,16px);border-top:1px solid #eee;
+  padding-top:clamp(5px,.8vw,8px);display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:4px}
+.footer span{font-size:clamp(6px,.85vw,8px);color:#bbb;letter-spacing:.5px}
+.loading{text-align:center;padding:clamp(20px,5vw,40px);color:#bbb;
+  font-size:12px;letter-spacing:2px}
+
+/* ─── MOBILE DOT MODE (<= 640px) ─────────────────────── */
+@media (max-width:640px){
+  body{padding:8px}
+  .calendar td{min-height:52px}
+  .cell-inner{min-height:52px}
+  .am-label,.pm-label{display:none}
+  /* In mobile mode, hide detail blocks, show only dots */
+  .job-block.mobile-hide{display:none}
+  .am-half,.pm-half{padding:1px 2px;overflow:visible}
+  .date-num{font-size:12px}
+  /* Dot indicators instead of blocks */
+  .day-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin:1px}
+  /* Detail list visible below calendar on mobile */
+  .mobile-detail-list{display:block}
+  .detail-section{display:none} /* hide big table on mobile */
+  .nav-btn{padding:5px 10px;font-size:10px}
+  h1{font-size:20px}
+}
+@media (min-width:641px){
+  .mobile-detail-list{display:none}
+  .day-dot{display:none}
+}
+
+/* ── MOBILE DETAIL LIST ── */
+.mobile-detail-list{margin-top:16px}
+.mdl-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:#999;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #eee}
+.mdl-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;
+  border-bottom:1px solid #f0f0f0}
+.mdl-stripe{width:4px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:40px}
+.mdl-body{flex:1;min-width:0}
+.mdl-name{font-size:13px;font-weight:700;color:#111}
+.mdl-car{font-size:11px;color:#555;margin-top:1px}
+.mdl-meta{font-size:10px;color:#888;margin-top:2px}
+.mdl-mech{font-size:10px;font-weight:600;color:#666;margin-top:2px}
+
+@media print{
+  body{background:#fff;padding:0;display:block}
+  .page{box-shadow:none;width:100%;max-width:none;padding:8mm 10mm;border-radius:0}
+  .nav-row,.refresh-btn,.status-bar,.mobile-detail-list{display:none!important}
+  .calendar td{min-height:26mm}
+  .cell-inner{min-height:26mm}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="company">Kineteq Group · Axis Motorsports · Axis Gallery</div>
+      <h1 id="monthTitle">— <span>—</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="nav-row">
+        <button class="nav-btn" onclick="changeMonth(-1)">← Prev</button>
+        <button class="nav-btn today" onclick="goToday()">Today</button>
+        <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
+        <button class="refresh-btn" onclick="loadAndRender()">↺ Refresh</button>
+        <button class="nav-btn" onclick="window.print()">🖨 Print</button>
+      </div>
+      <div style="text-align:right">
+        <div class="bay-label">Bay Schedule</div>
+        <div class="bay-count" id="jobCount">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Connecting to Google Sheets...</div>
+  <div class="legend-bar" id="legendBar"></div>
+
+  <table class="calendar">
+    <thead>
+      <tr>
+        <th class="day-header">MON</th><th class="day-header">TUE</th>
+        <th class="day-header">WED</th><th class="day-header">THU</th>
+        <th class="day-header">FRI</th><th class="day-header">SAT</th>
+        <th class="day-header">SUN</th>
+      </tr>
+    </thead>
+    <tbody id="calBody"><tr><td colspan="7" class="loading">Loading schedule...</td></tr></tbody>
+  </table>
+
+  <!-- Desktop detail table -->
+  <div id="detailSection"></div>
+
+  <!-- Mobile-only job list -->
+  <div class="mobile-detail-list" id="mobileList"></div>
+
+  <div class="footer">
+    <span>Kineteq Group · Axis Motorsports</span>
+    <span id="footerMonth">—</span>
+    <span>AM slots open for booking</span>
+  </div>
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxXkzqAbYdCV9n4PQvOw3p7uK-vAkyNnrObGfO2P15Qc8UbgjIsgwBK_H9f6rkfIwus8g/exec';
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+const LOC_COLORS = {
+  'motorsports': { bg:'#EBF4FF', border:'#3182CE', text:'#1a4a7a',
+    badge_bg:'rgba(49,130,206,0.15)', badge_color:'#1a4a80', badge_border:'#3182CE', label:'Motorsports' },
+  'gallery':     { bg:'#FFF5F5', border:'#E53E3E', text:'#7a1a1a',
+    badge_bg:'rgba(229,62,62,0.13)', badge_color:'#9b1c1c', badge_border:'#E53E3E', label:'Gallery' },
+  'offsite':     { bg:'#F7FAFC', border:'#718096', text:'#2d3748',
+    badge_bg:'rgba(113,128,150,0.12)', badge_color:'#2d3748', badge_border:'#718096', label:'Off-site' },
+};
+
+const COLOR_POOL = [
+  { bg:'#F0FFF4', border:'#38A169', text:'#1a5c35' },
+  { bg:'#FAF5FF', border:'#805AD5', text:'#44337A' },
+  { bg:'#FFFAF0', border:'#DD6B20', text:'#7B341E' },
+  { bg:'#FFF5F5', border:'#E53E3E', text:'#7a1a1a' },
+  { bg:'#EBF4FF', border:'#3182CE', text:'#1a4a7a' },
+  { bg:'#E6FFFA', border:'#2C7A7B', text:'#1D4044' },
+  { bg:'#FAF5F0', border:'#975A16', text:'#6b3a0a' },
+  { bg:'#F0F4FF', border:'#553C9A', text:'#322659' },
+];
+const CUSTOMER_COLORS = {};
+let colorIndex = 0;
+
+function getJobColor(job) {
+  if (!CUSTOMER_COLORS[job.name]) {
+    CUSTOMER_COLORS[job.name] = COLOR_POOL[colorIndex % COLOR_POOL.length];
+    colorIndex++;
+  }
+  return CUSTOMER_COLORS[job.name];
+}
+
+function detectLoc(location) {
+  if (!location) return 'motorsports';
+  const l = location.toLowerCase();
+  if (l.includes('gallery') || l.includes('rama')) return 'gallery';
+  if (l.includes('off') || l.includes('off-site') || l.includes('ayutthaya') || l.includes('hunter')) return 'offsite';
+  return 'motorsports';
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function parseDate(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dmy) return new Date(+dmy[3], +dmy[2]-1, +dmy[1]);
+  const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd) return new Date(+ymd[1], +ymd[2]-1, +ymd[3]);
+  if (str.includes('T')) {
+    const d = new Date(str);
+    const bkk = new Date(d.getTime() + 7*3600000);
+    return new Date(bkk.getFullYear(), bkk.getMonth(), bkk.getDate());
+  }
+  return null;
+}
+
+function parseTime(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  // Google Sheets serial number (fraction of day)
+  if (!isNaN(Number(str)) && str !== '' && !str.includes(':')) {
+    const totalMins = Math.round(Number(str) * 24 * 60);
+    return totalMins; // absolute minutes from midnight
+  }
+  // ISO datetime string from Sheets API
+  if (str.includes('T')) {
+    const d = new Date(str);
+    // Sheets times are stored as 1899-12-30 base — extract UTC hours+mins directly
+    return d.getUTCHours() * 60 + d.getUTCMinutes();
+  }
+  // Plain HH:MM string
+  const m = str.match(/^(\d{1,2}):(\d{2})/);
+  return m ? parseInt(m[1])*60 + parseInt(m[2]) : null;
+}
+
+function dayInRange(day, start, end) {
+  if (!start) return false;
+  const e = end || start;
+  return day >= start && day <= e;
+}
+
+function sameDay(a,b){
+  return a&&b&&a.getDate()===b.getDate()&&a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear();
+}
+
+let viewYear  = new Date().getFullYear();
+let viewMonth = new Date().getMonth();
+let allJobs   = [];
+
+async function loadAndRender() {
+  document.getElementById('statusBar').textContent = '● Fetching from Google Sheets...';
+  try {
+    const res  = await fetch(API_URL + '?t=' + Date.now(), {cache:'no-store'});
+    const rows = await res.json();
+
+    const K_ID    = 'Job ID';
+    const K_NAME  = 'First-name (ชื่อจริง)';
+    const K_CAR   = 'Car: Brand+Model (ยี่ห้อ+รุ่นรถ)';
+    const K_JOB   = 'Job Type';
+    const K_LOC   = 'Location';
+    const K_DATE  = 'Appointment Date (วันที่จะทำ)';
+    const K_START = 'Start Time';
+    const K_END   = 'End Time';
+    const K_EDATE = 'End Date (วันที่เสร็จ)';
+    const K_DEL   = 'Delivery Date';
+    const K_NOTES = 'Notes';
+    const K_MECH  = 'Mechanic';
+
+    allJobs = rows
+      .filter(r => r[K_DATE] && r['Status'] !== 'Cancelled')
+      .map(r => {
+        const startDate = parseDate(r[K_DATE]);
+        const endDate   = parseDate(r[K_EDATE]) || startDate;
+        const startMins = parseTime(r[K_START]);
+        const endMins   = parseTime(r[K_END]);
+        return {
+          id: r[K_ID] || '',
+          name: r[K_NAME] || '',
+          car:  r[K_CAR]  || '',
+          task: r[K_JOB]  || '',
+          location: r[K_LOC] || '',
+          mechanic: r[K_MECH] || '',
+          startDate, endDate,
+          startMins, endMins,
+          delivery: r[K_DEL] || '',
+          notes: r[K_NOTES] || '',
+        };
+      })
+      .filter(j => j.startDate);
+
+    const first = new Date(viewYear, viewMonth, 1);
+    const last  = new Date(viewYear, viewMonth+1, 0);
+    const monthJobs = allJobs.filter(j => j.startDate <= last && (!j.endDate || j.endDate >= first));
+
+    document.getElementById('statusBar').textContent =
+      `● ${allJobs.length} total bookings · ${monthJobs.length} this month · Updated ${new Date().toLocaleTimeString('th')}`;
+    renderCalendar();
+  } catch(e) {
+    document.getElementById('statusBar').textContent = `⚠ Could not load: ${e.message}`;
+  }
+}
+
+function getJobsForDay(day) {
+  return allJobs.filter(j => dayInRange(day, j.startDate, j.endDate));
+}
+
+function locBadgeStyle(location) {
+  const loc = detectLoc(location);
+  const c   = LOC_COLORS[loc] || LOC_COLORS.motorsports;
+  return `background:${c.badge_bg};color:${c.badge_color};border-left:2px solid ${c.badge_border};`;
+}
+
+function renderJobBlock(job, showId=true) {
+  const c = getJobColor(job);
+  const tStart = job.startMins !== null ? `${pad(Math.floor(job.startMins/60))}:${pad(job.startMins%60)}` : '';
+  const tEnd   = job.endMins   !== null ? `${pad(Math.floor(job.endMins/60))}:${pad(job.endMins%60)}`   : '';
+  const timeStr = tStart && tEnd ? `${tStart}–${tEnd}` : '';
+  const mechStr = job.mechanic ? job.mechanic.split(',').map(m=>m.trim()).filter(Boolean).join(' · ') : '';
+  return `
+    <div class="job-block" style="background:${c.bg};border-left:2.5px solid ${c.border};color:${c.text}">
+      ${showId && job.id ? `<span class="job-id-badge">${job.id}</span>` : ''}
+      <div class="jname">${job.name}</div>
+      <div class="jcar">${job.car}</div>
+      <div class="jtask">${job.task}</div>
+      <span class="loc-badge" style="${locBadgeStyle(job.location)}">${job.location||'AXIS'}</span>
+      ${timeStr ? `<div class="jtime">${timeStr}</div>` : ''}
+      ${mechStr ? `<div class="mech-badge">👤 ${mechStr}</div>` : ''}
+    </div>`;
+}
+
+// Compact dot for mobile
+function renderDot(job) {
+  const c = getJobColor(job);
+  return `<span class="day-dot" style="background:${c.border};title:'${job.name}'"></span>`;
+}
+
+function renderCalendar() {
+  document.getElementById('monthTitle').innerHTML =
+    `${MONTHS[viewMonth]} <span>${viewYear}</span>`;
+  document.getElementById('footerMonth').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+
+  const firstDay = new Date(viewYear, viewMonth, 1);
+  const lastDay  = new Date(viewYear, viewMonth+1, 0);
+  const startDow = (firstDay.getDay() + 6) % 7; // 0=Mon
+
+  const first     = new Date(viewYear, viewMonth, 1);
+  const last      = new Date(viewYear, viewMonth+1, 0);
+  const monthJobs = allJobs.filter(j => j.startDate <= last && (!j.endDate || j.endDate >= first));
+  const uniqueIds = new Set(monthJobs.map(j => j.id || j.name));
+  document.getElementById('jobCount').textContent = `${uniqueIds.size} Job${uniqueIds.size!==1?'s':''}`;
+
+  // Legend
+  const seen = {};
+  monthJobs.forEach(j => { if (!seen[j.name]) seen[j.name] = getJobColor(j); });
+  document.getElementById('legendBar').innerHTML =
+    Object.entries(seen).map(([n,c]) =>
+      `<div class="legend-pill"><div class="legend-dot" style="background:${c.border}"></div>${n}</div>`
+    ).join('') +
+    `<div class="legend-pill"><div class="legend-dot" style="background:#fff;border:1px solid #ddd"></div>Open slot</div>`;
+
+  // Calendar rows
+  let html = '';
+  let day  = 1 - startDow;
+  const today = new Date();
+  const todayClean = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  while (day <= lastDay.getDate()) {
+    html += '<tr>';
+    for (let dow = 0; dow < 7; dow++) {
+      const d       = new Date(viewYear, viewMonth, day);
+      const inMonth = d.getMonth() === viewMonth && d.getDate() >= 1;
+      const isSun   = dow === 6;
+      const isSat   = dow === 5;
+      const isToday = inMonth && sameDay(d, todayClean);
+
+      if (!inMonth) { html += '<td class="empty"></td>'; day++; continue; }
+
+      if (isSun) {
+        html += `<td class="closed"><div class="cell-inner">
+          <div class="cell-date"><div class="date-num" style="color:#ccc">${d.getDate()}</div></div>
+          <div style="display:flex;align-items:center;justify-content:center;flex:1">
+            <div class="closed-label">CLOSED</div>
+          </div>
+        </div></td>`;
+        day++; continue;
+      }
+
+      const dayJobs = getJobsForDay(d);
+      const amJobs  = dayJobs.filter(j => j.startMins !== null && j.startMins < 12*60);
+      const pmJobs  = dayJobs.filter(j => j.startMins !== null && j.startMins >= 12*60);
+      const allDay  = dayJobs.filter(j => j.startMins === null);
+      const tdStyle = isToday
+        ? 'background:#fff8f8;outline:2px solid #E53E3E;outline-offset:-2px;z-index:1;position:relative'
+        : '';
+      const tdClass = isSat ? 'weekend' : '';
+      const todayBadge = isToday
+        ? `<span style="background:#E53E3E;color:#fff;font-size:clamp(5px,.65vw,7px);font-weight:800;
+            padding:1px 4px;border-radius:2px;letter-spacing:.5px">TODAY</span>`
+        : '';
+
+      html += `<td class="${tdClass}" style="${tdStyle}"><div class="cell-inner">
+        <div class="cell-date">
+          <div class="date-num">${d.getDate()}</div>${todayBadge}
+        </div>
+        <div class="cell-body">
+          <div class="am-half">
+            <div class="am-label">AM</div>
+            ${amJobs.map(j => `${renderJobBlock(j)}`).join('')}
+            ${allDay.map(j => `${renderJobBlock(j)}`).join('')}
+            ${/* mobile dots */ amJobs.map(j => renderDot(j)).join('')}
+          </div>
+          <div class="pm-half">
+            <div class="pm-label">PM</div>
+            ${pmJobs.map(j => `${renderJobBlock(j)}`).join('')}
+            ${pmJobs.length===0 && amJobs.length>0 ? '<div class="bay-occupied"><div class="bay-occupied-text">Bay in use</div></div>' : ''}
+            ${/* mobile dots */ pmJobs.map(j => renderDot(j)).join('')}
+          </div>
+        </div>
+      </div></td>`;
+      day++;
+    }
+    html += '</tr>';
+    if (day > lastDay.getDate()) break;
+  }
+  document.getElementById('calBody').innerHTML = html;
+
+  // ── Desktop detail table ─────────────────────────────
+  const uniqueJobs = [];
+  const seenIds    = new Set();
+  monthJobs.forEach(j => {
+    const k = j.id || (j.name + j.task);
+    if (!seenIds.has(k)) { seenIds.add(k); uniqueJobs.push(j); }
+  });
+
+  const fmtDate = d => d ? `${pad(d.getDate())} ${MONTH_SHORT[d.getMonth()]}` : '—';
+
+  if (uniqueJobs.length > 0) {
+    let t = `<div class="detail-section">
+      <div class="detail-title">Job Details — ${MONTHS[viewMonth]} ${viewYear}</div>
+      <table class="detail-table">
+        <thead><tr>
+          <th>Job ID</th><th>Customer</th><th>Vehicle</th>
+          <th>Location</th><th>Task</th><th>Schedule</th>
+          <th>Mechanic</th><th>Delivery</th>
+        </tr></thead><tbody>`;
+    uniqueJobs.forEach(j => {
+      const c = getJobColor(j);
+      const s = j.startMins!==null ? `${pad(Math.floor(j.startMins/60))}:${pad(j.startMins%60)}` : '';
+      const e = j.endMins!==null   ? `${pad(Math.floor(j.endMins/60))}:${pad(j.endMins%60)}`   : '';
+      const sched = j.startDate ? (sameDay(j.startDate,j.endDate)
+        ? `${fmtDate(j.startDate)} · ${s}–${e}`
+        : `${fmtDate(j.startDate)} → ${fmtDate(j.endDate)} · ${s}–${e}`)
+        : '—';
+      const mechDisplay = j.mechanic
+        ? j.mechanic.split(',').map(m=>`<span style="display:inline-block;background:#f0f0f0;border-radius:2px;padding:0 4px;font-size:6px;font-weight:700;margin:1px">${m.trim()}</span>`).join(' ')
+        : '<span style="color:#ccc">—</span>';
+      t += `<tr>
+        <td style="font-family:monospace;font-weight:800;font-size:7px">${j.id||'—'}</td>
+        <td><span class="color-swatch" style="background:${c.border}"></span>${j.name}</td>
+        <td>${j.car}</td>
+        <td>${j.location||'—'}</td>
+        <td>${j.task}</td>
+        <td>${sched}</td>
+        <td>${mechDisplay}</td>
+        <td>${j.delivery||'—'}</td>
+      </tr>`;
+    });
+    t += '</tbody></table></div>';
+    document.getElementById('detailSection').innerHTML = t;
+  } else {
+    document.getElementById('detailSection').innerHTML = '';
+  }
+
+  // ── Mobile detail list ────────────────────────────────
+  if (uniqueJobs.length > 0) {
+    let ml = `<div class="mdl-title">Jobs — ${MONTHS[viewMonth]} ${viewYear}</div>`;
+    uniqueJobs.forEach(j => {
+      const c = getJobColor(j);
+      const s = j.startMins!==null ? `${pad(Math.floor(j.startMins/60))}:${pad(j.startMins%60)}` : '';
+      const e = j.endMins!==null   ? `${pad(Math.floor(j.endMins/60))}:${pad(j.endMins%60)}`   : '';
+      const fmtD = d => d ? `${d.getDate()} ${MONTH_SHORT[d.getMonth()]}` : '—';
+      const sched = j.startDate ? (sameDay(j.startDate,j.endDate)
+        ? `${fmtD(j.startDate)} · ${s}–${e}`
+        : `${fmtD(j.startDate)} → ${fmtD(j.endDate)}`)
+        : '—';
+      const loc = detectLoc(j.location);
+      const lc  = LOC_COLORS[loc] || LOC_COLORS.motorsports;
+      const mechStr = j.mechanic ? j.mechanic.split(',').map(m=>m.trim()).filter(Boolean).join(', ') : '';
+      ml += `<div class="mdl-item">
+        <div class="mdl-stripe" style="background:${c.border}"></div>
+        <div class="mdl-body">
+          <div class="mdl-name">${j.name}</div>
+          <div class="mdl-car">${j.car}</div>
+          <div class="mdl-meta">${sched} · <span style="color:${lc.badge_color}">${j.location||'AXIS'}</span></div>
+          ${mechStr ? `<div class="mdl-mech">👤 ${mechStr}</div>` : ''}
+        </div>
+        <div style="font-family:monospace;font-size:9px;font-weight:700;color:#aaa;
+          white-space:nowrap;padding-top:2px">${j.id||''}</div>
+      </div>`;
+    });
+    document.getElementById('mobileList').innerHTML = ml;
+  } else {
+    document.getElementById('mobileList').innerHTML = '';
+  }
+}
+
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+  if (viewMonth > 11) { viewMonth = 0;  viewYear++; }
+  renderCalendar();
+}
+function goToday() {
+  const n = new Date();
+  viewYear  = n.getFullYear();
+  viewMonth = n.getMonth();
+  renderCalendar();
+}
+
+// Init
+const _n = new Date();
+viewYear  = _n.getFullYear();
+viewMonth = _n.getMonth();
+loadAndRender();
+</script>
+</body>
+</html>

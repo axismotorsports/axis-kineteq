@@ -1,0 +1,7 @@
+# Ignore everything by default
+*
+
+# Re-allow the deploy folder and this file
+!.gitignore
+!axis-deploy/
+!axis-deploy/**

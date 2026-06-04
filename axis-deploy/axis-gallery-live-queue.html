@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KINETEQ · LIVE BAY VIEW</title>
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#0d0d14;
+  --border:#1e1e2a;--border2:#2a2a3a;
+  --gold:#c8a800;--gold2:#1a1500;
+  --red:#ff2020;--green:#00c853;
+  --t1:#ffffff;--t2:#888899;--t3:#3a3a50;
+  --slot:46px;--tcol:68px;--side:215px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;height:70px;border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-box{width:36px;height:36px;background:#fff;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:16px;color:#000}
+.logo-name{font-size:15px;font-weight:800;letter-spacing:2.5px}
+.logo-sub{font-size:9px;letter-spacing:2px;color:var(--t2);margin-top:2px}
+.badge{display:flex;align-items:center;gap:7px;background:#13131c;
+  border:1px solid var(--border2);border-radius:20px;padding:7px 16px;
+  font-size:11px;font-weight:700;letter-spacing:1.5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.clock-wrap{text-align:right}
+.clock-main{font-size:52px;font-weight:200;letter-spacing:-1px;line-height:1;
+  font-variant-numeric:tabular-nums}
+.clock-sec{color:var(--gold);font-size:40px}
+.clock-date{font-size:10px;color:var(--t2);letter-spacing:1px;margin-top:2px}
+
+/* LOCATION FILTER TABS */
+.loc-tabs{display:flex;align-items:center;gap:8px;padding:8px 22px;
+  border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg3)}
+.loc-tab{padding:6px 18px;border-radius:6px;font-size:11px;font-weight:700;
+  letter-spacing:1px;cursor:pointer;border:1px solid var(--border2);
+  color:var(--t2);background:none;transition:all .15s;text-transform:uppercase}
+.loc-tab.active{background:var(--gold2);border-color:var(--gold);color:var(--gold)}
+.loc-tab:hover:not(.active){border-color:var(--t3);color:var(--t1)}
+
+/* LAYOUT */
+body{display:flex;flex-direction:column}
+.main{display:flex;flex:1;overflow:hidden}
+.tl-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* COLUMN HEADERS (above scroll, not scrolled) */
+.col-hdrs-row{display:flex;align-items:center;flex-shrink:0;
+  border-bottom:1px solid var(--border);background:var(--bg)}
+.col-hdr-spacer{width:var(--tcol);flex-shrink:0}
+.col-hdr-label{flex:1;padding:5px 12px;font-size:9px;font-weight:700;
+  letter-spacing:2.5px;color:var(--t2);text-transform:uppercase}
+.col-hdr-label.right{border-left:1px solid var(--border)}
+
+/* SCROLLABLE TIMELINE */
+.tl-scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex}
+.tl-scroll::-webkit-scrollbar{width:3px}
+.tl-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* TIME LABELS */
+.tl-labels{width:var(--tcol);flex-shrink:0}
+.tl-slot{height:var(--slot);display:flex;align-items:flex-start;
+  padding-top:5px;padding-right:9px;justify-content:flex-end;
+  font-variant-numeric:tabular-nums}
+.tl-slot.hr{font-size:12px;font-weight:500;color:var(--t1)}
+.tl-slot.hf{font-size:10px;color:var(--t3)}
+
+/* SCHEDULE COLUMNS */
+.schedule-wrap{flex:1;display:flex;position:relative;min-width:0}
+.schedule{flex:1;position:relative;min-width:0}
+.schedule.col-right{border-left:1px solid var(--border)}
+.gline{position:absolute;left:0;right:0;height:1px}
+.gline.hr{background:var(--border)}
+.gline.hf{background:#14141c}
+
+/* TIMEBAR — spans entire schedule-wrap */
+.timebar{position:absolute;left:0;right:0;height:2px;
+  background:var(--red);z-index:50;pointer-events:none;
+  box-shadow:0 0 10px rgba(255,32,32,.55)}
+.timebar-dot{position:absolute;left:-5px;top:-5px;
+  width:12px;height:12px;background:var(--red);border-radius:50%;
+  box-shadow:0 0 8px rgba(255,32,32,.8)}
+.timebar-tag{position:absolute;right:10px;top:-11px;
+  background:var(--red);color:#fff;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:3px;letter-spacing:.5px}
+
+/* JOB CARDS */
+.jcard{position:absolute;left:6px;right:6px;border-radius:6px;
+  padding:9px 12px;overflow:hidden;transition:opacity .3s,border-color .3s}
+.jcard.upcoming{background:var(--bg2);border:1px solid var(--border2);opacity:.65}
+.jcard.active{background:var(--gold2);border:1px solid var(--gold);opacity:1}
+.jcard.done{background:#0c0c12;border:1px solid #1a1a22;opacity:.28}
+.jcar{font-weight:700;color:#fff;line-height:1.1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jcustomer{font-size:11px;color:var(--t2);margin-top:2px}
+.jbottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px}
+.jtag{font-size:9px;font-weight:700;letter-spacing:1px;
+  background:#1c1c28;padding:2px 8px;border-radius:3px;color:#777;text-transform:uppercase}
+.jtimes{font-size:10px;color:var(--t3)}
+.jcountdown-wrap{position:absolute;right:12px;top:50%;transform:translateY(-50%);text-align:right}
+.jcountdown-lbl{font-size:8px;letter-spacing:1.5px;color:var(--t2);margin-bottom:1px}
+.jcountdown{font-size:30px;font-weight:200;letter-spacing:2px;
+  color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* EMPTY STATE */
+.empty-col{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;color:var(--t3);letter-spacing:2px;font-size:11px;pointer-events:none}
+
+/* SIDEBAR */
+.sidebar{width:var(--side);flex-shrink:0;border-left:1px solid var(--border);
+  padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.slbl{font-size:8px;letter-spacing:2px;color:var(--t2);text-transform:uppercase;margin-bottom:5px}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:11px}
+.srow{display:flex;gap:8px}
+.shalf{flex:1}
+.big{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;line-height:1}
+.scar{font-size:15px;font-weight:700;margin:3px 0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scust{font-size:11px;color:var(--t2)}
+.sjob{font-size:10px;color:var(--t2);margin-top:3px}
+.stimes{font-size:10px;color:var(--t3)}
+.pbar{height:2px;background:var(--border2);border-radius:1px;margin-top:7px;overflow:hidden}
+.pfill{height:100%;background:var(--gold);border-radius:1px;transition:width 1s linear}
+.ophours{font-size:17px;font-weight:600;letter-spacing:.5px}
+.source-lbl{font-size:8px;color:var(--t3);letter-spacing:1px;margin-top:4px}
+.offsite-row{font-size:10px;color:var(--t2);padding:3px 0;
+  border-bottom:1px solid #151520;line-height:1.4}
+.offsite-car{color:var(--t1);font-weight:600}
+
+/* NEXT UP BAR */
+.nextup{display:flex;align-items:center;gap:20px;padding:0 22px;height:76px;
+  border-top:1px solid var(--border);background:var(--bg3);flex-shrink:0}
+.nu-label{flex-shrink:0;border-left:3px solid var(--gold);padding-left:10px}
+.nu-ondeck{font-size:8px;letter-spacing:2px;color:var(--t2);text-transform:uppercase}
+.nu-title{font-size:14px;font-weight:700}
+.nu-car{font-size:26px;font-weight:700;letter-spacing:-.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nu-meta{display:flex;gap:10px;align-items:center;margin-top:2px;flex-wrap:wrap}
+.nu-cust{font-size:12px;color:var(--t2)}
+.nu-job{font-size:9px;font-weight:700;background:#1a1a22;
+  padding:2px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+.nu-loc{font-size:9px;color:var(--t3);letter-spacing:.5px}
+.nu-info{flex:1;min-width:0}
+.nu-time{text-align:right;flex-shrink:0}
+.nu-starts{font-size:9px;letter-spacing:2px;color:var(--t2);text-transform:uppercase}
+.nu-clock{font-size:38px;font-weight:200;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.nu-in{font-size:10px;color:var(--t2);margin-top:1px}
+.nu-in em{color:var(--gold);font-style:normal;font-weight:600}
+
+/* DEBUG BAR */
+.dbgbar{position:fixed;bottom:80px;left:0;right:0;background:#111;
+  border-top:1px solid #222;padding:6px 16px;font-size:10px;color:#888;
+  letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;z-index:999}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;right:16px;background:#1a1a2a;
+  border:1px solid var(--border2);border-radius:6px;padding:8px 12px;
+  font-size:10px;color:var(--t2);letter-spacing:1px;opacity:0;
+  transition:opacity .4s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-box">K</div>
+    <div>
+      <div class="logo-name">KINETEQ GROUP</div>
+      <div class="logo-sub">AXIS MOTORSPORTS · LIVE BAY VIEW</div>
+    </div>
+  </div>
+  <div class="badge"><div class="dot" id="liveDot"></div><span id="badgeText">LIVE</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button onclick="changeDay(-1)" style="background:#13131c;border:1px solid var(--border2);color:var(--t1);padding:6px 12px;border-radius:8px;font-size:14px;cursor:pointer">‹</button>
+    <input type="date" id="datePicker" style="background:#13131c;border:1px solid var(--border2);color:var(--t1);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;outline:none" onchange="onDateChange()">
+    <button onclick="changeDay(1)" style="background:#13131c;border:1px solid var(--border2);color:var(--t1);padding:6px 12px;border-radius:8px;font-size:14px;cursor:pointer">›</button>
+    <button onclick="goToday()" style="background:#13131c;border:1px solid var(--border2);color:var(--gold);padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer">TODAY</button>
+  </div>
+  <div class="clock-wrap">
+    <div class="clock-main" id="cTime">--:--<span class="clock-sec">:--</span></div>
+    <div class="clock-date" id="cDate">-- · -- ---- · ICT (UTC+7)</div>
+  </div>
+</div>
+
+<!-- LOCATION TABS -->
+<div class="loc-tabs">
+  <button class="loc-tab active" id="tab-all"     onclick="setFilter('all')">⬛ All Locations</button>
+  <button class="loc-tab"        id="tab-gallery" onclick="setFilter('gallery')">🏛️ Axis Gallery</button>
+  <button class="loc-tab"        id="tab-moto"    onclick="setFilter('moto')">🔧 Axis Motorsports</button>
+</div>
+
+<div class="main">
+  <div class="tl-wrap">
+
+    <!-- Column headers (not scrolled, hidden in single-location mode) -->
+    <div class="col-hdrs-row" id="colHdrsRow">
+      <div class="col-hdr-spacer"></div>
+      <div class="col-hdr-label" id="colHdrLeft">🏛️ AXIS GALLERY · RAMA 9</div>
+      <div class="col-hdr-label right" id="colHdrRight">🔧 AXIS MOTORSPORTS</div>
+    </div>
+
+    <!-- Scrollable timeline -->
+    <div class="tl-scroll" id="tlScroll">
+      <div class="tl-labels" id="tlLabels"></div>
+      <div class="schedule-wrap" id="schedWrap">
+        <div class="schedule" id="schedGallery"></div>
+        <div class="schedule col-right" id="schedMoto"></div>
+        <!-- Single timebar spans entire wrap -->
+        <div class="timebar" id="timebar" style="display:none">
+          <div class="timebar-dot"></div>
+          <div class="timebar-tag" id="tbTag">NOW</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="slbl" id="sidebarLbl">Live Status</div>
+    <div class="srow">
+      <div class="scard shalf">
+        <div class="slbl">Bay Status</div>
+        <div class="big" id="sBayStatus" style="color:var(--green)">—</div>
+      </div>
+      <div class="scard shalf">
+        <div class="slbl">Jobs Today</div>
+        <div class="big" id="sJobsTotal">—</div>
+      </div>
+    </div>
+    <div class="scard">
+      <div class="slbl" id="curInLbl">Currently in Bay</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:1px;color:var(--green)" id="sInBadge">—</div>
+      <div class="scar" id="sCurCar">—</div>
+      <div class="scust" id="sCurCust"></div>
+      <div class="sjob" id="sCurJob"></div>
+      <div class="stimes" id="sCurTimes"></div>
+      <div class="pbar"><div class="pfill" id="sProg" style="width:0%"></div></div>
+    </div>
+    <!-- Off-site field work -->
+    <div class="scard" id="offsiteCard" style="display:none">
+      <div class="slbl">Field Work Today</div>
+      <div id="offsiteList"></div>
+    </div>
+    <div class="scard">
+      <div class="slbl">Completed Today</div>
+      <div><span class="big" id="sDone">0</span><span style="font-size:11px;color:var(--t2)" id="sDoneOf"> of 0</span></div>
+    </div>
+    <div class="scard">
+      <div class="slbl">Operating Hours</div>
+      <div class="ophours">09:00–18:00</div>
+      <div class="source-lbl" id="sourceLabel">● Connecting...</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT UP BAR -->
+<div class="nextup">
+  <div class="nu-label">
+    <div class="nu-ondeck">On Deck</div>
+    <div class="nu-title">Next Up</div>
+  </div>
+  <div class="nu-info">
+    <div class="nu-car" id="nCar">—</div>
+    <div class="nu-meta">
+      <span class="nu-cust" id="nCust">—</span>
+      <span class="nu-job" id="nJob"></span>
+      <span class="nu-loc" id="nLoc"></span>
+    </div>
+  </div>
+  <div class="nu-time">
+    <div class="nu-starts">Starts</div>
+    <div class="nu-clock" id="nTime">—:—</div>
+    <div class="nu-in" id="nIn"></div>
+  </div>
+</div>
+
+<div class="dbgbar">
+  <span id="debugMsg">● Connecting to Google Sheets...</span>
+  <button onclick="loadFromSheets()" style="background:#1a1a2a;border:1px solid #333;color:#aaa;padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;letter-spacing:1px">↺ REFRESH</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────
+const SH = 9, EH = 18, TMINS = (EH - SH) * 60;
+const SLOT = 46, PPM = SLOT / 30;
+const API_URL = 'https://script.google.com/macros/s/AKfycbxXkzqAbYdCV9n4PQvOw3p7uK-vAkyNnrObGfO2P15Qc8UbgjIsgwBK_H9f6rkfIwus8g/exec';
+const RELOAD_INTERVAL = 60000;
+
+let viewingDate = null;
+let currentFilter = 'all'; // 'all' | 'gallery' | 'moto'
+let galleryJobs = [];
+let motoJobs    = [];
+let offsiteJobs = [];
+
+// ── HELPERS ──────────────────────────────────────────
+function ict() {
+  const n = new Date();
+  return new Date(n.getTime() + n.getTimezoneOffset() * 60000 + 7 * 3600000);
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+function mins2time(m) { return `${pad(Math.floor(m / 60) + SH)}:${pad(m % 60)}`; }
+function curMins() {
+  const n = ict();
+  return (n.getHours() - SH) * 60 + n.getMinutes() + n.getSeconds() / 60;
+}
+
+function parseTime(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  // Google Sheets serial number (fraction of day)
+  if (!isNaN(Number(str)) && str !== '' && !str.includes(':')) {
+    const totalMins = Math.round(Number(str) * 24 * 60);
+    return totalMins - SH * 60; // relative to SH
+  }
+  // ISO datetime — extract UTC h/m directly (Sheets uses 1899-12-30 base, no DST)
+  if (str.includes('T')) {
+    const d = new Date(str);
+    return (d.getUTCHours() - SH) * 60 + d.getUTCMinutes();
+  }
+  // Plain HH:MM string (with optional AM/PM)
+  const m = str.match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?/i);
+  if (!m) return null;
+  let h = parseInt(m[1]), min = parseInt(m[2]);
+  if (m[3]) {
+    if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+    if (m[3].toUpperCase() === 'AM' && h === 12) h = 0;
+  }
+  return (h - SH) * 60 + min;
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  str = String(str).trim();
+  if (str.includes('T') && (str.includes('Z') || str.includes('+'))) {
+    const utc = new Date(str);
+    const bkk = new Date(utc.getTime() + 7 * 3600000);
+    return new Date(bkk.getFullYear(), bkk.getMonth(), bkk.getDate());
+  }
+  const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (dmy) return new Date(+dmy[3], +dmy[2] - 1, +dmy[1]);
+  const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd) return new Date(+ymd[1], +ymd[2] - 1, +ymd[3]);
+  return null;
+}
+
+function isOnViewDate(startStr, endStr, target) {
+  const startD = parseDate(startStr);
+  const endD   = endStr ? parseDate(endStr) : startD;
+  if (!startD) return false;
+  const tClean = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  return tClean >= startD && tClean <= (endD || startD);
+}
+
+function isLocGallery(loc) {
+  const l = (loc || '').toLowerCase();
+  return l.includes('gallery') || l.includes('rama');
+}
+function isLocMoto(loc) {
+  const l = (loc || '').toLowerCase();
+  return l.includes('motorsport');
+}
+function isLocOffsite(loc) {
+  const l = (loc || '').toLowerCase();
+  return l.includes('off-site') || l.includes('offsite') || l.includes('off site')
+      || l.includes('ayutthaya') || l.includes('hunter');
+}
+
+function getViewDate() {
+  return viewingDate ? new Date(viewingDate) : ict();
+}
+function isViewingToday() {
+  if (!viewingDate) return true;
+  const t = ict(), v = new Date(viewingDate);
+  return v.getDate()===t.getDate() && v.getMonth()===t.getMonth() && v.getFullYear()===t.getFullYear();
+}
+function isViewingFuture() {
+  if (!viewingDate) return false;
+  const v = new Date(viewingDate);
+  v.setHours(23,59,59);
+  return v > ict();
+}
+
+// ── LOCATION FILTER TABS ─────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  ['all','gallery','moto'].forEach(id =>
+    document.getElementById('tab-' + id).classList.toggle('active', id === f)
+  );
+  applyFilterLayout();
+  tick();
+}
+
+function applyFilterLayout() {
+  const gCol     = document.getElementById('schedGallery');
+  const mCol     = document.getElementById('schedMoto');
+  const hdrsRow  = document.getElementById('colHdrsRow');
+  const colLeft  = document.getElementById('colHdrLeft');
+  const colRight = document.getElementById('colHdrRight');
+
+  if (currentFilter === 'all') {
+    gCol.style.display    = '';
+    mCol.style.display    = '';
+    mCol.style.borderLeft = '1px solid var(--border)';
+    hdrsRow.style.display = 'flex';
+  } else if (currentFilter === 'gallery') {
+    gCol.style.display    = '';
+    mCol.style.display    = 'none';
+    hdrsRow.style.display = 'none';
+  } else { // moto
+    gCol.style.display    = 'none';
+    mCol.style.display    = '';
+    mCol.style.borderLeft = 'none';
+    hdrsRow.style.display = 'none';
+  }
+}
+
+// ── DATE NAVIGATION ──────────────────────────────────
+function initDatePicker() {
+  const t = ict();
+  document.getElementById('datePicker').value =
+    `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+}
+function changeDay(delta) {
+  const picker = document.getElementById('datePicker');
+  const d = new Date(picker.value);
+  d.setDate(d.getDate() + delta);
+  picker.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  onDateChange();
+}
+function onDateChange() {
+  const val = document.getElementById('datePicker').value;
+  viewingDate = val ? new Date(val + 'T00:00:00') : null;
+  updateBadge();
+  loadFromSheets();
+}
+function goToday() {
+  viewingDate = null;
+  const t = ict();
+  document.getElementById('datePicker').value =
+    `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
+  updateBadge();
+  loadFromSheets();
+}
+function updateBadge() {
+  const dot   = document.getElementById('liveDot');
+  const badge = document.getElementById('badgeText');
+  const v = getViewDate();
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const dateLabel = `${v.getDate()} ${months[v.getMonth()]} ${v.getFullYear()}`;
+  if (isViewingToday()) {
+    dot.style.background = 'var(--green)';
+    badge.textContent = 'ALL BAYS · LIVE';
+  } else if (isViewingFuture()) {
+    dot.style.background = 'var(--gold)';
+    badge.textContent = `SCHEDULED · ${dateLabel}`;
+  } else {
+    dot.style.background = 'var(--t2)';
+    badge.textContent = `HISTORY · ${dateLabel}`;
+  }
+}
+
+// ── LOAD DATA ────────────────────────────────────────
+async function loadFromSheets() {
+  const dbg = document.getElementById('debugMsg');
+  dbg.textContent = '● Fetching schedule...';
+  dbg.style.color = '#888';
+  try {
+    const res = await fetch(API_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error('Invalid response');
+
+    const target = getViewDate();
+    const K_DATE  = 'Appointment Date (วันที่จะทำ)';
+    const K_EDATE = 'End Date (วันที่เสร็จ)';
+    const K_START = 'Start Time';
+    const K_END   = 'End Time';
+    const K_CAR   = 'Car: Brand+Model (ยี่ห้อ+รุ่นรถ)';
+    const K_NAME  = 'First-name (ชื่อจริง)';
+    const K_JOB   = 'Job Type';
+    const K_LOC   = 'Location';
+
+    const viewRows = rows.filter(r => {
+      if (!r[K_DATE]) return false;
+      if (r['Status'] === 'Cancelled') return false;
+      return isOnViewDate(String(r[K_DATE]), r[K_EDATE] ? String(r[K_EDATE]) : null, target);
+    });
+
+    const allParsed = viewRows
+      .map((r, i) => ({
+        id:       'j_' + i,
+        car:      String(r[K_CAR]  || 'Unknown Car'),
+        customer: String(r[K_NAME] || '—').split(' ')[0],
+        job:      String(r[K_JOB]  || 'Service'),
+        location: String(r[K_LOC]  || ''),
+        mechanic: String(r['Mechanic'] || ''),
+        s: parseTime(String(r[K_START] || '')),
+        e: parseTime(String(r[K_END]   || ''))
+      }))
+      .filter(j => j.s !== null && j.e !== null)
+      .sort((a, b) => a.s - b.s);
+
+    galleryJobs  = allParsed.filter(j => isLocGallery(j.location));
+    motoJobs     = allParsed.filter(j => isLocMoto(j.location));
+    offsiteJobs  = allParsed.filter(j =>
+      !isLocGallery(j.location) && !isLocMoto(j.location)
+    );
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dateLabel = `${target.getDate()} ${months[target.getMonth()]} ${target.getFullYear()}`;
+    const totalBay = galleryJobs.length + motoJobs.length;
+    dbg.textContent = `● Gallery: ${galleryJobs.length} · Motorsports: ${motoJobs.length} · Off-site: ${offsiteJobs.length} · ${dateLabel} · ${pad(ict().getHours())}:${pad(ict().getMinutes())}`;
+    dbg.style.color = totalBay > 0 ? '#00c853' : '#888';
+    document.getElementById('sourceLabel').textContent =
+      `● LIVE · ${totalBay} bay job${totalBay !== 1 ? 's' : ''} · ${dateLabel}`;
+
+    buildSchedule();
+    renderOffsiteSidebar();
+
+  } catch(e) {
+    dbg.textContent = `⚠ Error: ${e.message}`;
+    dbg.style.color = '#ff4444';
+    document.getElementById('sourceLabel').textContent = '⚠ Offline';
+    galleryJobs = []; motoJobs = []; offsiteJobs = [];
+    buildSchedule();
+    renderOffsiteSidebar();
+  }
+}
+
+// ── BUILD TIME LABELS ────────────────────────────────
+function buildLabels() {
+  const el = document.getElementById('tlLabels');
+  el.innerHTML = '';
+  for (let h = SH; h <= EH; h++) {
+    const d = document.createElement('div');
+    d.className = 'tl-slot hr';
+    d.textContent = `${pad(h)}:00`;
+    d.style.height = SLOT + 'px';
+    el.appendChild(d);
+    if (h < EH) {
+      const d2 = document.createElement('div');
+      d2.className = 'tl-slot hf';
+      d2.textContent = `${pad(h)}:30`;
+      d2.style.height = SLOT + 'px';
+      el.appendChild(d2);
+    }
+  }
+}
+
+// ── BUILD ONE COLUMN ─────────────────────────────────
+function buildColumn(colEl, jobList) {
+  colEl.innerHTML = '';
+  const totalH = TMINS * PPM;
+  colEl.style.height = totalH + 'px';
+
+  // Grid lines
+  for (let h = SH; h <= EH; h++) {
+    const t = (h - SH) * 2 * SLOT;
+    const l = document.createElement('div');
+    l.className = 'gline hr'; l.style.top = t + 'px'; colEl.appendChild(l);
+    if (h < EH) {
+      const l2 = document.createElement('div');
+      l2.className = 'gline hf'; l2.style.top = (t + SLOT) + 'px'; colEl.appendChild(l2);
+    }
+  }
+
+  if (jobList.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-col';
+    empty.innerHTML = '<div style="font-size:28px;margin-bottom:8px;color:var(--border2)">—</div>NO JOBS';
+    colEl.appendChild(empty);
+    return;
+  }
+
+  jobList.forEach(j => {
+    const topPx = j.s * PPM;
+    const htPx  = Math.max((j.e - j.s) * PPM, 44);
+    const card  = document.createElement('div');
+    card.className = 'jcard upcoming';
+    card.id = 'jc-' + j.id;
+    card.style.cssText = `top:${topPx}px;height:${htPx}px`;
+    const sm = htPx < 70;
+    const fs = htPx < 70 ? 13 : htPx < 95 ? 16 : 20;
+    const mechStr = j.mechanic
+      ? j.mechanic.split(',').map(m=>m.trim()).filter(Boolean)
+          .map(m=>`<span style="display:inline-block;background:#1a1a28;border:1px solid #2a2a3a;border-radius:3px;padding:0 5px;font-size:8px;font-weight:700;color:#888;letter-spacing:.5px;margin-right:2px">${m}</span>`).join('')
+      : '';
+    card.innerHTML = `
+      <div class="jcar" style="font-size:${fs}px">${j.car}</div>
+      ${!sm ? `<div class="jcustomer">${j.customer}</div>` : ''}
+      ${mechStr && !sm ? `<div style="margin-top:3px">${mechStr}</div>` : ''}
+      <div class="jbottom">
+        <span class="jtag">${j.job.replace(/[⚡🛢️🏎️]\s*/u,'').substring(0, 14)}</span>
+        <span class="jtimes">${mins2time(j.s)}→${mins2time(j.e)}</span>
+      </div>`;
+    colEl.appendChild(card);
+  });
+}
+
+function buildSchedule() {
+  buildColumn(document.getElementById('schedGallery'), galleryJobs);
+  buildColumn(document.getElementById('schedMoto'),    motoJobs);
+  applyFilterLayout();
+  scrollToCurrent();
+}
+
+// ── OFF-SITE SIDEBAR ─────────────────────────────────
+function renderOffsiteSidebar() {
+  const card = document.getElementById('offsiteCard');
+  const list = document.getElementById('offsiteList');
+  if (offsiteJobs.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  list.innerHTML = offsiteJobs.map(j => `
+    <div class="offsite-row">
+      <span class="offsite-car">${j.car}</span> · <span>${j.customer}</span>
+      <div style="color:var(--t3);font-size:9px;margin-top:1px">${j.location || 'Off-site'}</div>
+    </div>`).join('');
+}
+
+// ── AUTO-SCROLL ──────────────────────────────────────
+let userScrolled = false, scrollPauseTimer = null, autoScrolling = false;
+function initAutoScroll() {
+  const scroll = document.getElementById('tlScroll');
+  if (!scroll) return;
+  scroll.addEventListener('scroll', () => {
+    if (!autoScrolling) {
+      userScrolled = true;
+      clearTimeout(scrollPauseTimer);
+      scrollPauseTimer = setTimeout(() => { userScrolled = false; }, 15000);
+    }
+  }, { passive: true });
+}
+function scrollToCurrent(force = false) {
+  if (userScrolled && !force) return;
+  if (!isViewingToday()) return;
+  const cm = curMins();
+  if (cm < 0 || cm > TMINS) return;
+  const scroll = document.getElementById('tlScroll');
+  if (!scroll) return;
+  const target = Math.max(0, cm * PPM - scroll.clientHeight / 2);
+  autoScrolling = true;
+  scroll.scrollTo({ top: target, behavior: 'smooth' });
+  setTimeout(() => { autoScrolling = false; }, 600);
+}
+
+// ── TICK (every second) ──────────────────────────────
+function tick() {
+  const n = ict();
+  const h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
+  const cm = curMins();
+  const DAYS   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  // Clock
+  document.getElementById('cTime').innerHTML =
+    `${pad(h)}:${pad(m)}<span class="clock-sec">:${pad(s)}</span>`;
+  document.getElementById('cDate').textContent =
+    `${DAYS[n.getDay()]} · ${n.getDate()} ${MONTHS[n.getMonth()]} ${n.getFullYear()} · ICT (UTC+7)`;
+
+  // Timebar
+  const tb = document.getElementById('timebar');
+  if (tb) {
+    if (isViewingToday() && cm >= 0 && cm <= TMINS) {
+      tb.style.top = (cm * PPM) + 'px';
+      tb.style.display = 'block';
+      document.getElementById('tbTag').textContent = `NOW · ${pad(h)}:${pad(m)}`;
+    } else {
+      tb.style.display = 'none';
+    }
+  }
+
+  // Update card states for both columns and collect stats
+  function processColumn(jobList) {
+    let active = null, nextJob = null, done = 0;
+    const isFuture = isViewingFuture();
+    jobList.forEach(j => {
+      const card = document.getElementById('jc-' + j.id);
+      if (!card) return;
+      const isA = isViewingToday() && cm >= j.s && cm < j.e;
+      const isD = isViewingToday() && cm >= j.e;
+      card.className = 'jcard ' + (isFuture ? 'upcoming' : isA ? 'active' : isD ? 'done' : 'upcoming');
+      const old = card.querySelector('.jcountdown-wrap');
+      if (old) old.remove();
+      if (isA) {
+        active = j;
+        const endAbsSecs = (j.e + SH * 60) * 60;
+        const nowAbsSecs = h * 3600 + m * 60 + s;
+        const left = Math.max(0, endAbsSecs - nowAbsSecs);
+        const wrap = document.createElement('div');
+        wrap.className = 'jcountdown-wrap';
+        wrap.innerHTML = `
+          <div class="jcountdown-lbl">TIME LEFT</div>
+          <div class="jcountdown">${pad(Math.floor(left/3600))}:${pad(Math.floor(left%3600/60))}:${pad(left%60)}</div>`;
+        card.appendChild(wrap);
+      }
+      if (isD) done++;
+      if (!isA && !isD && !nextJob) nextJob = j;
+    });
+    return { active, nextJob, done };
+  }
+
+  const gState = processColumn(galleryJobs);
+  const mState = processColumn(motoJobs);
+
+  // Decide which job set drives the sidebar
+  const primaryJobs  = currentFilter === 'moto' ? motoJobs  : galleryJobs;
+  const primaryState = currentFilter === 'moto' ? mState    : gState;
+  const allBayJobs   = [...galleryJobs, ...motoJobs].sort((a,b)=>a.s-b.s);
+  const totalToday   = currentFilter === 'all' ? allBayJobs.length : primaryJobs.length;
+  const totalDone    = currentFilter === 'all' ? (gState.done + mState.done) : primaryState.done;
+
+  document.getElementById('sJobsTotal').textContent = totalToday;
+  document.getElementById('sDone').textContent      = totalDone;
+  document.getElementById('sDoneOf').textContent    = ` of ${totalToday}`;
+
+  // Sidebar label
+  const lblMap = { all: 'Live Status', gallery: '🏛️ Gallery Status', moto: '🔧 Motorsports Status' };
+  document.getElementById('sidebarLbl').textContent = lblMap[currentFilter];
+  const curLabel = currentFilter === 'moto' ? 'Currently at Motorsports' : 'Currently in Bay';
+  document.getElementById('curInLbl').textContent = curLabel;
+
+  const bsEl = document.getElementById('sBayStatus');
+  const { active } = primaryState;
+
+  if (isViewingFuture()) {
+    const hasBookings = primaryJobs.length > 0;
+    bsEl.textContent  = hasBookings ? 'Booked' : 'Free';
+    bsEl.style.color  = hasBookings ? 'var(--gold)' : 'var(--green)';
+    document.getElementById('sInBadge').textContent  = hasBookings ? '● SCHEDULED' : '— AVAILABLE';
+    document.getElementById('sCurCar').textContent   = hasBookings ? primaryJobs[0].car : '—';
+    document.getElementById('sCurCust').textContent  = hasBookings ? primaryJobs[0].customer : '';
+    document.getElementById('sCurJob').textContent   = hasBookings ? primaryJobs[0].job : '';
+    document.getElementById('sCurTimes').textContent = hasBookings ? `${mins2time(primaryJobs[0].s)}→${mins2time(primaryJobs[0].e)}` : '';
+    document.getElementById('sProg').style.width     = '0%';
+  } else if (active) {
+    bsEl.textContent  = 'In Use';
+    bsEl.style.color  = 'var(--red)';
+    document.getElementById('sInBadge').textContent  = '● IN PROGRESS';
+    document.getElementById('sCurCar').textContent   = active.car;
+    document.getElementById('sCurCust').textContent  = active.customer;
+    document.getElementById('sCurJob').textContent   = active.job;
+    document.getElementById('sCurTimes').textContent = `${mins2time(active.s)}→${mins2time(active.e)}`;
+    const pct = Math.min(100, ((cm - active.s) / (active.e - active.s)) * 100);
+    document.getElementById('sProg').style.width = pct + '%';
+  } else {
+    bsEl.textContent  = 'Free';
+    bsEl.style.color  = 'var(--green)';
+    document.getElementById('sInBadge').textContent  = '— AVAILABLE';
+    document.getElementById('sCurCar').textContent   = '—';
+    ['sCurCust','sCurJob','sCurTimes'].forEach(id =>
+      document.getElementById(id).textContent = '');
+    document.getElementById('sProg').style.width = '0%';
+  }
+
+  // Next Up — soonest upcoming across relevant job set
+  const relevantJobs = currentFilter === 'all' ? allBayJobs :
+                       currentFilter === 'moto' ? motoJobs : galleryJobs;
+  let nextJob = null;
+  if (isViewingToday()) {
+    nextJob = relevantJobs.find(j => cm < j.s);
+  } else if (isViewingFuture()) {
+    nextJob = relevantJobs[0] || null;
+  }
+
+  if (nextJob) {
+    document.getElementById('nCar').textContent  = nextJob.car;
+    document.getElementById('nCust').textContent = nextJob.customer;
+    document.getElementById('nJob').textContent  = nextJob.job.replace(/⚡\s*/,'').toUpperCase().substring(0, 22);
+    document.getElementById('nTime').textContent = mins2time(nextJob.s);
+    const loc = isLocGallery(nextJob.location) ? '🏛️ Gallery' : isLocMoto(nextJob.location) ? '🔧 Motorsports' : nextJob.location;
+    document.getElementById('nLoc').textContent = loc;
+    if (isViewingToday()) {
+      const mu = Math.max(0, Math.round(nextJob.s - cm));
+      const hh = Math.floor(mu / 60), mm2 = mu % 60;
+      document.getElementById('nIn').innerHTML = `in <em>${hh > 0 ? hh + 'h ' : ''}${mm2}m</em>`;
+    } else {
+      document.getElementById('nIn').textContent = '';
+    }
+  } else if (active) {
+    const loc = isLocGallery(active.location) ? '🏛️ Gallery' : isLocMoto(active.location) ? '🔧 Motorsports' : '';
+    document.getElementById('nCar').textContent   = 'Bay clears at';
+    document.getElementById('nCust').textContent  = '';
+    document.getElementById('nJob').textContent   = '';
+    document.getElementById('nTime').textContent  = mins2time(active.e);
+    document.getElementById('nIn').textContent    = '';
+    document.getElementById('nLoc').textContent   = loc;
+  } else {
+    const allDone = gState.done + mState.done;
+    document.getElementById('nCar').textContent  = allDone > 0 ? 'All jobs complete' : 'No jobs scheduled';
+    ['nCust','nJob','nIn','nLoc'].forEach(id => document.getElementById(id).textContent = '');
+    document.getElementById('nTime').textContent = '—';
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────
+buildLabels();
+initDatePicker();
+initAutoScroll();
+updateBadge();
+applyFilterLayout();
+loadFromSheets();
+setInterval(tick, 1000);
+setInterval(loadFromSheets, RELOAD_INTERVAL);
+setInterval(() => scrollToCurrent(), 30000);
+tick();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AXIS MOTORSPORTS · SYSTEM</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.logo-box{width:44px;height:44px;background:#fff;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#000}
+.logo-name{font-size:18px;font-weight:800;letter-spacing:3px}
+.logo-sub{font-size:10px;letter-spacing:2px;color:#888;margin-top:2px}
+.divider{width:40px;height:2px;background:#1e1e2a;border-radius:2px;margin:28px auto}
+.cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px}
+.card{display:flex;align-items:center;gap:16px;background:#111118;
+  border:1px solid #1e1e2a;border-radius:12px;padding:18px 20px;
+  text-decoration:none;color:#fff;transition:border-color .2s,background .2s}
+.card:hover{border-color:#2a2a3a;background:#14141e}
+.card:active{opacity:.8}
+.card-icon{font-size:22px;width:36px;text-align:center;flex-shrink:0}
+.card-title{font-size:14px;font-weight:700;letter-spacing:.5px}
+.card-desc{font-size:11px;color:#666;margin-top:3px;letter-spacing:.3px}
+.card-arrow{margin-left:auto;color:#2a2a3a;font-size:18px;flex-shrink:0}
+.card.gold{border-color:#2a2000}
+.card.gold:hover{border-color:#c8a800;background:#0f0d00}
+.card.gold .card-title{color:#c8a800}
+.footer{margin-top:32px;font-size:10px;color:#2a2a3a;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="logo">
+  <div class="logo-box">A</div>
+  <div>
+    <div class="logo-name">AXIS MOTORSPORTS</div>
+    <div class="logo-sub">INTERNAL SYSTEM</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="cards">
+  <a class="card gold" href="axis-gallery-booking.html">
+    <div class="card-icon">📋</div>
+    <div>
+      <div class="card-title">NEW BOOKING</div>
+      <div class="card-desc">Reserve a bay · Gallery or Motorsports</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <a class="card" href="axis-gallery-live-queue.html">
+    <div class="card-icon">🔴</div>
+    <div>
+      <div class="card-title">LIVE QUEUE</div>
+      <div class="card-desc">See what's in each bay right now</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+
+  <a class="card" href="axis-calendar.html">
+    <div class="card-icon">📅</div>
+    <div>
+      <div class="card-title">CALENDAR</div>
+      <div class="card-desc">Monthly overview of all bookings</div>
+    </div>
+    <div class="card-arrow">›</div>
+  </a>
+</div>
+
+<div class="footer">KINETEQ GROUP · AXIS MOTORSPORTS</div>
+
+</body>
+</html>

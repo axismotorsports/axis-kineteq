@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AXIS GALLERY · NEW BOOKING</title>
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#0d0d14;
+  --border:#1e1e2a;--border2:#2a2a3a;
+  --gold:#c8a800;--gold2:#1a1500;--gold3:#2a2000;
+  --green:#00c853;--green2:#0a1a0a;
+  --red:#ff2020;--red2:#1a0a0a;
+  --t1:#ffffff;--t2:#888899;--t3:#3a3a50;
+  --slot-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--t1);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;height:60px;border-bottom:1px solid var(--border);
+  background:var(--bg);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:32px;height:32px;background:#fff;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;color:#000;flex-shrink:0}
+.logo-name{font-size:13px;font-weight:800;letter-spacing:2px}
+.logo-sub{font-size:8px;letter-spacing:1.5px;color:var(--t2);margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:6px}
+.btn{background:var(--bg2);border:1px solid var(--border2);color:var(--t1);
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;letter-spacing:.5px;transition:background .15s}
+.btn:hover{background:#1a1a28}
+.btn.gold{border-color:var(--gold);color:var(--gold)}
+.btn-icon{background:var(--bg2);border:1px solid var(--border2);color:var(--t1);
+  width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-icon:hover{background:#1a1a28}
+
+/* DATE BAR */
+.datebar{display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-bottom:1px solid var(--border);background:var(--bg)}
+.date-display{flex:1;text-align:center;font-size:14px;font-weight:700;
+  letter-spacing:1px;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:8px;padding:7px 12px}
+.date-display input[type=date]{background:none;border:none;color:var(--t1);
+  font-size:14px;font-weight:700;letter-spacing:1px;width:100%;outline:none;
+  cursor:pointer;text-align:center}
+.day-label{font-size:10px;color:var(--t2);letter-spacing:1.5px;
+  text-align:center;padding:4px 0 8px}
+
+/* LOCATION TABS */
+.loc-tabs-bar{display:flex;gap:8px;padding:8px 16px;
+  border-bottom:1px solid var(--border);background:var(--bg)}
+.ltab{flex:1;padding:10px 0;border-radius:8px;font-size:12px;font-weight:700;
+  letter-spacing:.5px;cursor:pointer;border:1px solid var(--border2);
+  color:var(--t2);background:none;transition:all .15s;text-transform:uppercase;
+  touch-action:manipulation;text-align:center}
+.ltab.active{background:var(--gold2);border-color:var(--gold);color:var(--gold)}
+.ltab:active{opacity:.7}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;padding:0 16px 10px;justify-content:center}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);letter-spacing:.5px}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* TIMELINE */
+.timeline{padding:0 16px 120px}
+.slot{display:flex;align-items:stretch;height:var(--slot-h);border-bottom:1px solid #0e0e18;
+  cursor:pointer;transition:background .1s;position:relative;user-select:none}
+.slot:hover .slot-inner{background:#0d1a10 !important}
+.slot-time{width:52px;flex-shrink:0;display:flex;align-items:center;
+  font-size:11px;font-weight:500;color:var(--t2);padding-left:2px;letter-spacing:.3px}
+.slot-time.hr{color:var(--t1)}
+.slot-inner{flex:1;border-radius:6px;margin:4px 0;padding:0 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background .15s,border .15s;border:1px solid transparent}
+.slot.free .slot-inner{background:#0d0f0d;border-color:#1a1e1a}
+.slot.free:hover .slot-inner{background:#111a11;border-color:#223322}
+.slot.booked .slot-inner{background:var(--gold2);border-color:var(--gold);cursor:default}
+.slot.booked:hover .slot-inner{background:var(--gold2)}
+.slot.selected .slot-inner{background:#0a1e0a;border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.slot.conflict .slot-inner{background:var(--red2);border-color:var(--red);cursor:not-allowed}
+.slot.past .slot-inner{opacity:.35;cursor:default}
+.slot-label{font-size:12px;font-weight:600}
+.slot-sub{font-size:10px;color:var(--t2)}
+.slot-tag{font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:2px 7px;border-radius:3px;background:#222;color:#888;text-transform:uppercase}
+.slot-tag.booked{background:#2a2000;color:var(--gold)}
+.free-label{font-size:10px;color:#2a3a2a;letter-spacing:1px;text-transform:uppercase}
+.check-icon{font-size:14px;color:var(--green)}
+
+/* BOOKING PANEL */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  display:none;align-items:flex-end}
+.panel-overlay.open{display:flex}
+.panel{background:#13131e;border-top:1px solid var(--border2);
+  border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;
+  max-height:85vh;overflow-y:auto;animation:slideup .25s ease}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.panel-handle{width:40px;height:4px;background:var(--border2);
+  border-radius:2px;margin:0 auto 16px}
+.panel-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.panel-sub{font-size:12px;color:var(--t2);margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;
+  color:var(--t2);text-transform:uppercase;margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--bg2);
+  border:1px solid var(--border2);color:var(--t1);padding:11px 14px;
+  border-radius:8px;font-size:14px;outline:none;transition:border-color .15s;
+  appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.field input::placeholder{color:var(--t3)}
+.duration-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dur-btn{background:var(--bg2);border:1px solid var(--border2);color:var(--t2);
+  padding:10px 0;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;text-align:center;transition:all .15s}
+.dur-btn.active{background:var(--gold2);border-color:var(--gold);color:var(--gold)}
+.dur-btn:hover:not(.active){border-color:var(--t3);color:var(--t1)}
+.time-preview{background:var(--bg2);border:1px solid var(--border2);
+  border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:14px}
+.tp-label{font-size:9px;letter-spacing:1.5px;color:var(--t2);text-transform:uppercase}
+.tp-time{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.tp-arrow{font-size:18px;color:var(--t3)}
+.conflict-msg{background:var(--red2);border:1px solid var(--red);border-radius:8px;
+  padding:10px 14px;font-size:12px;color:#ff6666;margin-bottom:14px;display:none}
+.btn-confirm{width:100%;background:var(--gold);color:#000;border:none;
+  padding:15px;border-radius:10px;font-size:15px;font-weight:800;
+  letter-spacing:1px;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.btn-confirm:hover{opacity:.9}
+.btn-confirm:disabled{background:var(--border2);color:var(--t3);cursor:not-allowed;opacity:1}
+.btn-cancel{width:100%;background:none;border:1px solid var(--border2);color:var(--t2);
+  padding:12px;border-radius:10px;font-size:13px;cursor:pointer;margin-top:8px}
+
+/* MECHANIC SELECTOR */
+.mech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.mech-btn{background:var(--bg2);border:1px solid var(--border2);color:var(--t2);
+  padding:12px 0;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;text-align:center;transition:all .15s;touch-action:manipulation}
+.mech-btn.active{background:#0a1a0a;border-color:var(--green);color:var(--green);
+  box-shadow:0 0 0 1px var(--green)}
+.mech-btn.busy{background:var(--red2);border-color:var(--red);color:#ff6666;
+  position:relative}
+.mech-btn:active{opacity:.7}
+.mech-status{font-size:11px;padding:6px 0;min-height:20px;line-height:1.4}
+
+/* SUCCESS */
+.success-overlay{position:fixed;inset:0;background:var(--bg);z-index:300;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.success-overlay.show{display:flex}
+.success-icon{font-size:64px;animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.success-title{font-size:22px;font-weight:800}
+.success-sub{font-size:14px;color:var(--t2);text-align:center;line-height:1.6}
+.success-card{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  padding:16px 20px;text-align:center;min-width:260px}
+.sc-car{font-size:18px;font-weight:700;margin-bottom:4px}
+.sc-detail{font-size:12px;color:var(--t2)}
+.sc-time{font-size:24px;font-weight:300;color:var(--gold);
+  letter-spacing:1px;margin-top:8px;font-variant-numeric:tabular-nums}
+
+/* STATUS */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:#0a0a12;
+  border-top:1px solid var(--border);padding:6px 16px;
+  font-size:10px;color:var(--t3);letter-spacing:1px;display:flex;
+  justify-content:space-between;align-items:center;z-index:150}
+</style>
+</head>
+<body>
+
+<!-- PIN LOCK SCREEN (Staff — add bookings only) -->
+<div id="pinScreen" style="position:fixed;inset:0;background:#0a0a0f;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+  <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#fff">AXIS GALLERY</div>
+  <div style="font-size:11px;color:#888;letter-spacing:2px">STAFF · BOOKING ACCESS</div>
+  <div style="display:flex;gap:10px;margin:8px 0" id="pinDots">
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="d0"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="d1"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="d2"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="d3"></div>
+  </div>
+  <div id="pinError" style="font-size:11px;color:#ff4444;letter-spacing:1px;height:16px"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,72px);gap:10px">
+    <button onclick="pinPress(1)" class="pin-btn">1</button>
+    <button onclick="pinPress(2)" class="pin-btn">2</button>
+    <button onclick="pinPress(3)" class="pin-btn">3</button>
+    <button onclick="pinPress(4)" class="pin-btn">4</button>
+    <button onclick="pinPress(5)" class="pin-btn">5</button>
+    <button onclick="pinPress(6)" class="pin-btn">6</button>
+    <button onclick="pinPress(7)" class="pin-btn">7</button>
+    <button onclick="pinPress(8)" class="pin-btn">8</button>
+    <button onclick="pinPress(9)" class="pin-btn">9</button>
+    <div></div>
+    <button onclick="pinPress(0)" class="pin-btn">0</button>
+    <button onclick="pinDel()" class="pin-btn" style="color:#888">⌫</button>
+  </div>
+</div>
+<style>
+.pin-btn{width:72px;height:72px;background:#111118;border:1px solid #2a2a3a;color:#fff;
+  font-size:22px;font-weight:300;border-radius:50%;cursor:pointer;transition:background .1s}
+.pin-btn:active{background:#222230}
+</style>
+<script>
+const CORRECT_PIN  = '1234'; // ← STAFF PIN — share with booking staff
+let pinEntry = '';
+function pinPress(n) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += n;
+  updateDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 200);
+}
+function pinDel() { pinEntry = pinEntry.slice(0,-1); updateDots(); }
+function updateDots() {
+  [0,1,2,3].forEach(i => {
+    const d = document.getElementById('d'+i);
+    d.style.background = i < pinEntry.length ? '#c8a800' : 'transparent';
+    d.style.borderColor = i < pinEntry.length ? '#c8a800' : '#333';
+  });
+}
+function checkPin() {
+  if (pinEntry === CORRECT_PIN) {
+    document.getElementById('pinScreen').style.display = 'none';
+  } else {
+    document.getElementById('pinError').textContent = 'Incorrect PIN';
+    pinEntry = '';
+    updateDots();
+    setTimeout(() => document.getElementById('pinError').textContent = '', 1500);
+  }
+}
+</script>
+
+<!-- ══ MANAGER PIN OVERLAY (cancel requires this) ══ -->
+<div id="mgrPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:700;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+  <div style="font-size:10px;font-weight:800;letter-spacing:3px;color:#ff6666">🔐 MANAGER ACCESS REQUIRED</div>
+  <div style="font-size:10px;color:#666;letter-spacing:2px">Cancellation needs manager PIN</div>
+  <div style="display:flex;gap:10px;margin:4px 0">
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="mg0"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="mg1"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="mg2"></div>
+    <div style="width:14px;height:14px;border-radius:50%;border:1.5px solid #333" id="mg3"></div>
+  </div>
+  <div id="mgError" style="font-size:11px;color:#ff4444;letter-spacing:1px;height:14px"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,72px);gap:10px">
+    <button onclick="mgPress(1)" class="pin-btn">1</button>
+    <button onclick="mgPress(2)" class="pin-btn">2</button>
+    <button onclick="mgPress(3)" class="pin-btn">3</button>
+    <button onclick="mgPress(4)" class="pin-btn">4</button>
+    <button onclick="mgPress(5)" class="pin-btn">5</button>
+    <button onclick="mgPress(6)" class="pin-btn">6</button>
+    <button onclick="mgPress(7)" class="pin-btn">7</button>
+    <button onclick="mgPress(8)" class="pin-btn">8</button>
+    <button onclick="mgPress(9)" class="pin-btn">9</button>
+    <div></div>
+    <button onclick="mgPress(0)" class="pin-btn">0</button>
+    <button onclick="mgDel()" class="pin-btn" style="color:#888">⌫</button>
+  </div>
+  <button onclick="closeMgrPin()" style="background:none;border:1px solid #333;color:#555;padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer;letter-spacing:1px;margin-top:4px">← Back</button>
+</div>
+<script>
+const MANAGER_PIN = '5678'; // ← MANAGER PIN — keep private, required to cancel
+let mgEntry = '', mgrCallback = null;
+function requestManagerPin(cb) {
+  mgrCallback = cb; mgEntry = '';
+  updateMgDots();
+  document.getElementById('mgError').textContent = '';
+  document.getElementById('mgrPinOverlay').style.display = 'flex';
+}
+function closeMgrPin() {
+  document.getElementById('mgrPinOverlay').style.display = 'none';
+  mgEntry = ''; mgrCallback = null;
+}
+function mgPress(n) {
+  if (mgEntry.length >= 4) return;
+  mgEntry += String(n); updateMgDots();
+  if (mgEntry.length === 4) setTimeout(checkMgrPin, 200);
+}
+function mgDel() { mgEntry = mgEntry.slice(0,-1); updateMgDots(); }
+function updateMgDots() {
+  [0,1,2,3].forEach(i => {
+    const d = document.getElementById('mg'+i);
+    if (!d) return;
+    d.style.background   = i < mgEntry.length ? '#ff6666' : 'transparent';
+    d.style.borderColor  = i < mgEntry.length ? '#ff6666' : '#333';
+  });
+}
+function checkMgrPin() {
+  const entered = String(mgEntry);
+  setTimeout(() => {
+    if (entered === '5678') {
+      document.getElementById('mgrPinOverlay').style.display = 'none';
+      const cb = mgrCallback; mgrCallback = null; mgEntry = '';
+      if (cb) cb();
+    } else {
+      document.getElementById('mgError').textContent = 'Incorrect PIN — access denied (got: ' + entered + ')';
+      mgEntry = ''; updateMgDots();
+      setTimeout(() => { document.getElementById('mgError').textContent = ''; }, 3000);
+    }
+  }, 400);
+}
+</script>
+
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-box">A</div>
+    <div><div class="logo-name">AXIS GALLERY</div>
+    <div class="logo-sub">NEW BOOKING</div></div>
+  </div>
+  <div class="hdr-right">
+    <button class="btn" onclick="goToday()">Today</button>
+  </div>
+</div>
+
+<div class="datebar">
+  <button class="btn-icon" onclick="changeDay(-1)">‹</button>
+  <button id="dateBtn" onclick="toggleCalPicker()" style="flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;touch-action:manipulation">
+    <span id="datePickerLabel" style="font-size:15px;font-weight:700;letter-spacing:1px;color:var(--t1)">—</span>
+    <span style="font-size:12px;color:var(--t2)">▾</span>
+  </button>
+  <button class="btn-icon" onclick="changeDay(1)">›</button>
+</div>
+<div class="day-label" id="dayLabel">—</div>
+
+<!-- LOCATION TABS -->
+<div class="loc-tabs-bar">
+  <button id="ltab-gallery" class="ltab active" onclick="setLocTab('gallery')">🏛️ Gallery</button>
+  <button id="ltab-moto"    class="ltab"        onclick="setLocTab('moto')">🔧 Motorsports</button>
+</div>
+
+<!-- TAP CALENDAR PICKER -->
+<div id="calPickerOverlay" onclick="handleCalPickerOverlay(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#13131e;border:1px solid var(--border2);border-radius:16px;padding:16px;width:min(340px,92vw);max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <button onclick="calPickerMonth(-1)" style="background:none;border:none;color:var(--t1);font-size:20px;cursor:pointer;padding:4px 10px">‹</button>
+      <div id="calPickerTitle" style="font-size:14px;font-weight:700;letter-spacing:1px"></div>
+      <button onclick="calPickerMonth(1)" style="background:none;border:none;color:var(--t1);font-size:20px;cursor:pointer;padding:4px 10px">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px">
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t2);padding:4px">M</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t2);padding:4px">T</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t2);padding:4px">W</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t2);padding:4px">T</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t2);padding:4px">F</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t3);padding:4px">S</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--t3);padding:4px">S</div>
+    </div>
+    <div id="calPickerDays" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+    <button onclick="selectToday()" style="width:100%;margin-top:12px;background:none;border:1px solid var(--gold);color:var(--gold);padding:10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px">TODAY</button>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#1a2a1a;border:1px solid #2a4a2a"></div>Available</div>
+  <div class="leg"><div class="leg-dot" style="background:var(--gold2);border:1px solid var(--gold)"></div>Booked</div>
+  <div class="leg"><div class="leg-dot" style="background:#0a1e0a;border:1px solid var(--green)"></div>Selected</div>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<!-- BOOKING PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="handleOverlayClick(event)">
+  <div class="panel" id="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title" id="panelTitle">New Booking</div>
+    <div class="panel-sub" id="panelSub">Fill in the details below</div>
+
+    <div class="time-preview">
+      <div><div class="tp-label">Start</div><div class="tp-time" id="tpStart">—</div></div>
+      <div class="tp-arrow">→</div>
+      <div style="text-align:right"><div class="tp-label">End</div><div class="tp-time" id="tpEnd">—</div></div>
+    </div>
+
+    <div class="field">
+      <label>Start Time</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="time" id="fStartTime" step="300"
+          style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--t1);padding:11px 14px;border-radius:8px;font-size:16px;outline:none;transition:border-color .15s;-webkit-appearance:none"
+          oninput="applyCustomTime()">
+        <span style="font-size:10px;color:var(--t2);letter-spacing:.5px;white-space:nowrap">tap to change</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Duration</label>
+      <div class="duration-grid" id="durGrid"></div>
+    </div>
+
+    <div class="conflict-msg" id="conflictMsg"></div>
+
+    <div class="field">
+      <label>Customer Name (ชื่อลูกค้า) *</label>
+      <input type="text" id="fName" placeholder="e.g. K'Win · ชื่อลูกค้า" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Vehicle — Brand + Model (ยี่ห้อ + รุ่น) *</label>
+      <input type="text" id="fCar" placeholder="e.g. BMW M2 F87 · Honda Civic FL5" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Location (สถานที่) *</label>
+      <select id="fLocation">
+        <option value="🏛️ Gallery — Rama9">🏛️ AXIS Gallery — Rama9</option>
+        <option value="🔧 AXIS Motorsports">🔧 AXIS Motorsports</option>
+        <option value="Off-site">Off-site</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Job Type / Task *</label>
+      <select id="fJob">
+        <option value="">— Select job type —</option>
+        <optgroup label="⚡ ZESTEK">
+          <option>⚡ ZESTEK — Steering Wheel Application</option>
+        </optgroup>
+        <optgroup label="🛢️ MOTY'S">
+          <option>🛢️ MOTY'S — Engine Oil Change</option>
+          <option>🛢️ MOTY'S — Gear Oil Service</option>
+          <option>🛢️ MOTY'S — Differential Oil Service</option>
+          <option>🛢️ MOTY'S — Full Oil Package</option>
+        </optgroup>
+        <optgroup label="🏎️ TOM'S">
+          <option>🏎️ TOM'S — Oil Change</option>
+        </optgroup>
+        <optgroup label="Engine">
+          <option>Full Engine Build / Rebuild</option>
+          <option>Engine Swap</option>
+          <option>Turbo / Forced Induction Install</option>
+          <option>Turbo Upgrade</option>
+          <option>ECU Tune / Remap</option>
+          <option>ECU Flash / Quick Tune</option>
+          <option>Custom Wiring / Harness</option>
+        </optgroup>
+        <optgroup label="Suspension & Chassis">
+          <option>Coilover Install</option>
+          <option>Suspension Arms & Links</option>
+          <option>Roll Cage / Chassis Fab</option>
+          <option>Alignment & Corner Weight</option>
+        </optgroup>
+        <optgroup label="Exterior & Wheels">
+          <option>Wheel & Tire Fitting</option>
+          <option>Brake Upgrade</option>
+          <option>Intake & Exhaust Install</option>
+          <option>Bolt-on Performance Parts</option>
+        </optgroup>
+        <optgroup label="Service">
+          <option>Oil & Fluid Service</option>
+          <option>Pre-Track Inspection</option>
+          <option>General Inspection</option>
+          <option>Gauge & Sensor Install</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Mechanic(s) Assigned (ช่างที่รับผิดชอบ)</label>
+      <div class="mech-grid" id="mechGrid">
+        <button class="mech-btn" id="mb-Ta"  onclick="toggleMech('Ta')">Ta</button>
+        <button class="mech-btn" id="mb-Ben" onclick="toggleMech('Ben')">Ben</button>
+        <button class="mech-btn" id="mb-Na"  onclick="toggleMech('Na')">Na</button>
+        <button class="mech-btn" id="mb-Tay" onclick="toggleMech('Tay')">Tay</button>
+      </div>
+      <div class="mech-status" id="mechStatus"></div>
+    </div>
+
+    <div class="field">
+      <label>Pickup / Delivery Date (วันส่งคืนรถ) — leave blank if same day</label>
+      <button id="pickupDateBtn" onclick="togglePickupPicker()" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;cursor:pointer;text-align:left;color:var(--t2);font-size:13px;display:flex;align-items:center;justify-content:space-between">
+        <span id="pickupDateLabel">Same day as appointment</span>
+        <span style="font-size:11px">▾</span>
+      </button>
+    </div>
+    <div class="field">
+      <label>Notes (หมายเหตุ)</label>
+      <input type="text" id="fNotes" placeholder="e.g. First visit · Parts TBD" autocomplete="off">
+    </div>
+
+    <button class="btn-confirm" id="btnConfirm" onclick="submitBooking()" disabled>
+      CONFIRM BOOKING
+    </button>
+    <button class="btn-cancel" onclick="closePanel()">Cancel</button>
+  </div>
+</div>
+
+<!-- PICKUP DATE PICKER -->
+<div id="pickupPickerOverlay" onclick="if(event.target===this)closePickupPicker()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center">
+  <div style="background:#13131e;border:1px solid var(--border2);border-radius:16px;padding:16px;width:min(340px,92vw)" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <button onclick="_ppMonth(-1)" style="background:none;border:none;color:var(--t1);font-size:20px;cursor:pointer;padding:4px 10px">‹</button>
+      <div id="ppTitle" style="font-size:14px;font-weight:700;letter-spacing:1px"></div>
+      <button onclick="_ppMonth(1)" style="background:none;border:none;color:var(--t1);font-size:20px;cursor:pointer;padding:4px 10px">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px">
+      <div style="text-align:center;font-size:10px;color:var(--t2);padding:4px">M</div><div style="text-align:center;font-size:10px;color:var(--t2);padding:4px">T</div><div style="text-align:center;font-size:10px;color:var(--t2);padding:4px">W</div><div style="text-align:center;font-size:10px;color:var(--t2);padding:4px">T</div><div style="text-align:center;font-size:10px;color:var(--t2);padding:4px">F</div><div style="text-align:center;font-size:10px;color:var(--t3);padding:4px">S</div><div style="text-align:center;font-size:10px;color:var(--t3);padding:4px">S</div>
+    </div>
+    <div id="ppDays" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+    <button onclick="clearPickupDate()" style="width:100%;margin-top:10px;background:none;border:1px solid var(--border2);color:var(--t2);padding:8px;border-radius:8px;font-size:12px;cursor:pointer">Same day (no separate pickup date)</button>
+  </div>
+</div>
+
+<!-- CANCEL PANEL -->
+<div class="panel-overlay" id="cancelOverlay" onclick="handleCancelOverlayClick(event)">
+  <div class="panel" id="cancelPanel">
+    <div class="panel-handle"></div>
+    <div class="panel-title" style="color:#ff6666">Cancel Booking</div>
+    <div class="panel-sub" id="cancelSub">Are you sure?</div>
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--t2);letter-spacing:1px;margin-bottom:4px" id="cJobId"></div>
+      <div style="font-size:18px;font-weight:700" id="cCar"></div>
+      <div style="font-size:12px;color:var(--t2);margin-top:2px" id="cCustomer"></div>
+      <div style="font-size:12px;color:var(--t2);margin-top:2px" id="cJob"></div>
+      <div style="font-size:13px;color:var(--gold);margin-top:6px;font-weight:600" id="cTime"></div>
+    </div>
+    <button id="btnCancel" onclick="confirmCancel()" style="width:100%;background:rgba(255,32,32,.15);border:1px solid rgba(255,32,32,.5);color:#ff6666;padding:14px;border-radius:10px;font-size:15px;font-weight:800;letter-spacing:1px;cursor:pointer;margin-bottom:8px">
+      ✕ CANCEL THIS BOOKING
+    </button>
+    <button onclick="closeCancelPanel()" class="btn-cancel">Keep Booking</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div style="font-size:56px">✅</div>
+  <div class="success-title">Booking Confirmed!</div>
+  <div class="success-card" id="successCard"></div>
+  <div style="font-size:12px;color:var(--t2)">Added to the schedule</div>
+  <button class="btn gold" style="margin-top:8px" onclick="afterSuccess()">
+    + Book Another
+  </button>
+</div>
+
+<div class="status-bar">
+  <span id="statusMsg">● Loading...</span>
+  <button onclick="refreshData()" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;letter-spacing:1px">↺ REFRESH</button>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbxXkzqAbYdCV9n4PQvOw3p7uK-vAkyNnrObGfO2P15Qc8UbgjIsgwBK_H9f6rkfIwus8g/exec';
+const API_SECRET = 'K1N3T3Q-AX15-2026'; // ← CHANGE THIS — must match SECRET in Apps Script
+const SH = 9, EH = 18;
+const DURATIONS = [
+  {label:'30m', mins:30},
+  {label:'1h',  mins:60},
+  {label:'1.5h',mins:90},
+  {label:'2h',  mins:120},
+  {label:'3h',  mins:180},
+  {label:'4h',  mins:240}
+];
+const DAYS  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+let bookings = [];
+let selectedStart = null;
+let selectedDur = 60;
+let viewDate = null;
+let activeLocation = 'gallery'; // 'gallery' | 'moto'
+const MECHANICS = ['Ta','Ben','Na','Tay'];
+let selectedMechanics = new Set();
+
+// ── LOCATION TAB ────────────────────────────────────
+function setLocTab(loc) {
+  activeLocation = loc;
+  document.getElementById('ltab-gallery').classList.toggle('active', loc === 'gallery');
+  document.getElementById('ltab-moto').classList.toggle('active', loc === 'moto');
+  // Pre-set location dropdown to match tab
+  const sel = document.getElementById('fLocation');
+  if (sel) {
+    if (loc === 'gallery') sel.value = '🏛️ Gallery — Rama9';
+    else sel.value = '🔧 AXIS Motorsports';
+  }
+  renderTimeline();
+}
+
+// ── MECHANIC SELECTOR ───────────────────────────────
+function toggleMech(m) {
+  if (selectedMechanics.has(m)) selectedMechanics.delete(m);
+  else selectedMechanics.add(m);
+  updateMechButtons();
+  validateForm();
+}
+
+function updateMechButtons() {
+  const startM = selectedStart;
+  const endM   = startM !== null ? startM + selectedDur : null;
+  MECHANICS.forEach(m => {
+    const btn = document.getElementById('mb-' + m);
+    if (!btn) return;
+    const isSelected = selectedMechanics.has(m);
+    const isBusy     = endM !== null ? mechanicIsBusy(m, startM, endM) : false;
+    btn.className = 'mech-btn' + (isSelected ? ' active' : '') + (isBusy && !isSelected ? ' busy' : '');
+    // Show "BUSY" label for non-selected busy mechanics
+    if (isBusy && !isSelected) {
+      btn.innerHTML = `${m}<br><span style="font-size:8px;letter-spacing:.5px;opacity:.8">BUSY</span>`;
+    } else {
+      btn.textContent = m;
+    }
+  });
+}
+
+function mechanicIsBusy(m, startM, endM) {
+  const today = viewDate || ictToday();
+  return bookings.some(b => {
+    if (!b.mechanic) return false;
+    const mechs = b.mechanic.split(',').map(x => x.trim());
+    if (!mechs.includes(m)) return false;
+    const bStart = parseDate(b.date);
+    const bEnd   = b.endDate ? parseDate(b.endDate) : bStart;
+    if (!bStart) return false;
+    const tc = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (tc < bStart || tc > (bEnd || bStart)) return false;
+    return startM < b.endMins && endM > b.startMins;
+  });
+}
+
+function checkMechanicConflict(startM, endM) {
+  const selected = [...selectedMechanics];
+  if (selected.length === 0) return null;
+  const today = viewDate || ictToday();
+  for (const b of bookings) {
+    if (!b.mechanic) continue;
+    const mechs  = b.mechanic.split(',').map(x => x.trim());
+    const shared = selected.filter(m => mechs.includes(m));
+    if (shared.length === 0) continue;
+    const bStart = parseDate(b.date);
+    const bEnd   = b.endDate ? parseDate(b.endDate) : bStart;
+    if (!bStart) continue;
+    const tc = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (tc < bStart || tc > (bEnd || bStart)) continue;
+    if (startM < b.endMins && endM > b.startMins) {
+      return { mechanics: shared, booking: b };
+    }
+  }
+  return null;
+}
+
+function resetMechanics() {
+  selectedMechanics.clear();
+  MECHANICS.forEach(m => {
+    const btn = document.getElementById('mb-' + m);
+    if (btn) { btn.className = 'mech-btn'; btn.textContent = m; }
+  });
+  const st = document.getElementById('mechStatus');
+  if (st) { st.textContent = ''; st.style.color = ''; }
+}
+
+function pad(n){return String(n).padStart(2,'0')}
+function mins2time(m){return`${pad(Math.floor(m/60)+SH)}:${pad(m%60)}`}
+function time2mins(str){const[h,m]=str.split(':').map(Number);return(h-SH)*60+m}
+
+function ict(){
+  // Always return Bangkok time (UTC+7) regardless of device timezone
+  const n=new Date();
+  const utcMs=n.getTime()+n.getTimezoneOffset()*60000;
+  return new Date(utcMs+7*3600000);
+}
+function ictToday(){
+  const d=ict();
+  return new Date(d.getFullYear(),d.getMonth(),d.getDate());
+}
+
+function getDateStr(d){
+  return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function getDisplayDate(d){
+  return`${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+function formatBookingDate(d){
+  return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+
+function parseDate(str){
+  if(!str) return null;
+  str=String(str).trim();
+  if(str.includes('T')&&str.includes('Z')){
+    const d=new Date(str);
+    const bkk=new Date(d.getTime()+7*3600000);
+    return new Date(bkk.getFullYear(),bkk.getMonth(),bkk.getDate());
+  }
+  const dmy=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(dmy) return new Date(+dmy[3],+dmy[2]-1,+dmy[1]);
+  const ymd=str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(ymd) return new Date(+ymd[1],+ymd[2]-1,+ymd[3]);
+  return null;
+}
+
+function parseTime(str){
+  if(!str) return null;
+  str=String(str).trim();
+  if(str.includes('T')){
+    const d=new Date(str);
+    return(d.getUTCHours()-SH)*60+d.getUTCMinutes();
+  }
+  const m=str.match(/^(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  let h=parseInt(m[1]),min=parseInt(m[2]);
+  return(h-SH)*60+min;
+}
+
+function isSameDay(dateStr,target){
+  const d=parseDate(dateStr);
+  if(!d) return false;
+  return d.getDate()===target.getDate()&&d.getMonth()===target.getMonth()&&d.getFullYear()===target.getFullYear();
+}
+
+// Check if a time range overlaps with existing bookings (location-aware)
+function isOffsite(loc){ const l=(loc||'').toLowerCase(); return l.includes('off-site')||l.includes('offsite')||l.includes('off site'); }
+function isGalleryLoc(loc){ const l=(loc||'').toLowerCase(); return l.includes('gallery')||l.includes('rama'); }
+function isMotoLoc(loc){ const l=(loc||'').toLowerCase(); return l.includes('motorsport'); }
+
+function hasOverlap(startMins, endMins, exclude=null){
+  const today = viewDate || ictToday();
+  // Get the location that is currently selected in the form (or fall back to active tab)
+  const selEl = document.getElementById('fLocation');
+  const selLoc = selEl ? selEl.value : (activeLocation === 'gallery' ? '🏛️ Gallery — Rama9' : '🔧 AXIS Motorsports');
+  // Off-site bookings never block a bay
+  if(isOffsite(selLoc)) return false;
+  const selIsGallery = isGalleryLoc(selLoc) || (!isMotoLoc(selLoc) && !isOffsite(selLoc));
+
+  return bookings.some(b => {
+    if(b._id === exclude) return false;
+    const bLoc = b.location || '';
+    // Off-site bookings don't block any bay
+    if(isOffsite(bLoc)) return false;
+    // Location must match — Gallery vs Motorsports are separate bays
+    const bIsGallery = isGalleryLoc(bLoc) || (!isMotoLoc(bLoc) && !isOffsite(bLoc));
+    if(selIsGallery !== bIsGallery) return false;
+    // Date range check
+    const bStart = parseDate(b.date);
+    const bEnd = b.endDate ? parseDate(b.endDate) : bStart;
+    if(!bStart) return false;
+    const todayClean = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if(todayClean < bStart || todayClean > (bEnd||bStart)) return false;
+    // Time overlap
+    return startMins < b.endMins && endMins > b.startMins;
+  });
+}
+
+// Init date picker
+function initDate(){
+  const t=ictToday();
+  viewDate=new Date(t.getFullYear(),t.getMonth(),t.getDate());
+  _cpY=t.getFullYear();
+  _cpM=t.getMonth();
+  updateDateLabel();
+  updateDayLabel();
+}
+
+function updateDateLabel(){
+  if(!viewDate) return;
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('datePickerLabel').textContent=
+    `${pad(viewDate.getDate())} ${M[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+}
+
+function updateDayLabel(){
+  if(!viewDate) return;
+  document.getElementById('dayLabel').textContent=getDisplayDate(viewDate);
+}
+
+function changeDay(delta){
+  const d=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+delta);
+  viewDate=d;
+  _cpY=d.getFullYear();
+  _cpM=d.getMonth();
+  updateDateLabel();
+  updateDayLabel();
+  refreshData();
+}
+
+function onDateChange(){ refreshData(); }
+
+function goToday(){
+  selectCalDay(ictToday());
+}
+
+// Load bookings
+async function refreshData(){
+  document.getElementById('statusMsg').textContent='● Fetching schedule...';
+  try{
+    const res=await fetch(API+'?t='+Date.now(),{cache:'no-store'});
+    const rows=await res.json();
+    const K_DATE='Appointment Date (วันที่จะทำ)';
+    const K_START='Start Time', K_END='End Time';
+    const K_CAR='Car: Brand+Model (ยี่ห้อ+รุ่นรถ)';
+    const K_NAME='First-name (ชื่อจริง)', K_JOB='Job Type';
+    const K_STATUS='Status';
+
+    bookings = rows
+      .filter(r=>r[K_DATE] && r[K_STATUS]!=='Cancelled')
+      .map((r,i)=>({
+        _id: i,
+        _row: r._row || (i+2),
+        date: r[K_DATE],
+        endDate: r['End Date (วันที่เสร็จ)'] || r['Delivery Date'] || r['End date(วันส่งมอบ)'] || r[K_DATE],
+        name: (r[K_NAME]||'').split(' ')[0],
+        fullName: r[K_NAME]||'',
+        car:  r[K_CAR]||'',
+        job:  r[K_JOB]||'',
+        jobId: r['Job ID']||'',
+        location: r['Location']||'',
+        mechanic: r['Mechanic']||'',
+        startMins: parseTime(r[K_START]),
+        endMins:   parseTime(r[K_END])
+      }))
+      .filter(b=>b.startMins!==null&&b.endMins!==null);
+
+    const todayCount=bookings.filter(b=>isSameDay(b.date,viewDate||ict())).length;
+    document.getElementById('statusMsg').textContent=
+      `● ${todayCount} booking${todayCount!==1?'s':''} on ${getDisplayDate(viewDate||ict())}`;
+    renderTimeline();
+  } catch(e){
+    document.getElementById('statusMsg').textContent=`⚠ ${e.message}`;
+  }
+}
+
+// Render timeline
+function renderTimeline(){
+  const el=document.getElementById('timeline');
+  el.innerHTML='';
+  const now=ict();
+  const isToday=viewDate&&viewDate.getDate()===now.getDate()&&
+    viewDate.getMonth()===now.getMonth()&&viewDate.getFullYear()===now.getFullYear();
+  const curMins=(now.getHours()-SH)*60+now.getMinutes();
+  const vd = viewDate || ictToday();
+  const vdClean = new Date(vd.getFullYear(), vd.getMonth(), vd.getDate());
+  const todayBookings=bookings.filter(b=>{
+    // Date range check
+    const bs=parseDate(b.date);
+    const be=b.endDate?parseDate(b.endDate):bs;
+    if(!bs) return false;
+    if(vdClean<bs || vdClean>(be||bs)) return false;
+    // Off-site jobs don't appear on bay timeline
+    if(isOffsite(b.location||'')) return false;
+    // Location filter — show only the active tab's location
+    const bIsGallery = isGalleryLoc(b.location||'') || (!isMotoLoc(b.location||'') && !isOffsite(b.location||''));
+    if(activeLocation === 'gallery') return bIsGallery;
+    if(activeLocation === 'moto')    return isMotoLoc(b.location||'');
+    return true;
+  });
+
+  for(let m=0;m<(EH-SH)*60;m+=30){
+    const h=Math.floor(m/60)+SH;
+    const min=m%60;
+    const timeStr=`${pad(h)}:${pad(min)}`;
+    const booking=todayBookings.find(b=>b.startMins<=m&&b.endMins>m);
+    const isPast=isToday&&m<curMins;
+
+    const slot=document.createElement('div');
+    slot.className='slot';
+    slot.dataset.mins=m;
+
+    const timeEl=document.createElement('div');
+    timeEl.className='slot-time'+(min===0?' hr':'');
+    timeEl.textContent=timeStr;
+
+    const inner=document.createElement('div');
+    inner.className='slot-inner';
+
+    if(booking){
+      slot.classList.add('booked');
+      const isStart=booking.startMins>m-30;
+      inner.innerHTML=isStart
+        ?`<div><div class="slot-label">${booking.car}</div>
+           <div class="slot-sub">${booking.name}</div></div>
+           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+             <div class="slot-tag booked">${booking.job.replace(/⚡\s*/,'').substring(0,12)}</div>
+             <button onclick="event.stopPropagation();openCancelPanel(${booking._row})" style="background:rgba(255,32,32,.15);border:1px solid rgba(255,32,32,.4);color:#ff6666;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;cursor:pointer;letter-spacing:.5px">CANCEL</button>
+           </div>`
+        :`<div class="slot-sub" style="color:var(--t3);font-size:10px">↳ ${booking.car}</div>`;
+    } else {
+      slot.classList.add('free');
+      if(isPast) slot.classList.add('past');
+      inner.innerHTML=`<span class="free-label">Available</span>`;
+      if(!isPast){
+        slot.onclick=()=>openPanel(m);
+      }
+    }
+
+    slot.appendChild(timeEl);
+    slot.appendChild(inner);
+    el.appendChild(slot);
+  }
+}
+
+// Open booking panel
+function openPanel(startMins){
+  selectedStart=startMins;
+  selectedDur=60;
+
+  // Build duration buttons
+  const grid=document.getElementById('durGrid');
+  grid.innerHTML='';
+  DURATIONS.forEach(d=>{
+    const btn=document.createElement('button');
+    btn.className='dur-btn'+(d.mins===selectedDur?' active':'');
+    btn.textContent=d.label;
+    const endMins=startMins+d.mins;
+    const blocked=endMins>(EH-SH)*60||hasOverlap(startMins,endMins);
+    if(blocked){
+      btn.disabled=true;
+      btn.style.opacity='.3';
+      btn.style.cursor='not-allowed';
+    } else {
+      btn.onclick=()=>selectDuration(d.mins);
+    }
+    grid.appendChild(btn);
+  });
+
+  // Pre-fill location from active tab
+  const locSel = document.getElementById('fLocation');
+  if(locSel){
+    locSel.value = activeLocation === 'moto' ? '🔧 AXIS Motorsports' : '🏛️ Gallery — Rama9';
+  }
+  const _tf = document.getElementById('fStartTime');
+  if(_tf){ const _h=Math.floor(startMins/60)+SH; const _m=startMins%60; _tf.value=`${pad(_h)}:${pad(_m)}`; }
+  updateTimePreview();
+  const locLabel = activeLocation === 'moto' ? 'Axis Motorsports' : 'Axis Gallery';
+  document.getElementById('panelTitle').textContent='New Booking';
+  document.getElementById('panelSub').textContent=
+    `${locLabel} · ${(viewDate||ict()).getDate()} ${MONTHS[(viewDate||ict()).getMonth()]}`;
+  document.getElementById('conflictMsg').style.display='none';
+  resetMechanics();
+  updateMechButtons();
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('fName').focus();
+}
+
+function applyCustomTime(){
+  const val=document.getElementById('fStartTime').value;
+  if(!val) return;
+  const parts=val.split(':');
+  const h=parseInt(parts[0]),m=parseInt(parts[1]);
+  if(isNaN(h)||isNaN(m)) return;
+  selectedStart=(h-SH)*60+m;
+  // Clamp to operating hours
+  if(selectedStart<0) selectedStart=0;
+  if(selectedStart>=(EH-SH)*60) selectedStart=(EH-SH)*60-30;
+  updateTimePreview();
+  // Refresh duration buttons
+  const grid=document.getElementById('durGrid');
+  if(grid){
+    Array.from(grid.children).forEach((btn,i)=>{
+      const endMins=selectedStart+DURATIONS[i].mins;
+      const blocked=endMins>(EH-SH)*60||hasOverlap(selectedStart,endMins);
+      btn.disabled=blocked;
+      btn.style.opacity=blocked?'.3':'1';
+      btn.style.cursor=blocked?'not-allowed':'pointer';
+    });
+  }
+  validateForm();
+}
+
+function selectDuration(mins){
+  selectedDur=mins;
+  document.querySelectorAll('.dur-btn').forEach((b,i)=>{
+    b.classList.toggle('active',DURATIONS[i].mins===mins);
+  });
+  updateTimePreview();
+  validateForm();
+}
+
+function updateTimePreview(){
+  const s=mins2time(selectedStart);
+  const e=mins2time(selectedStart+selectedDur);
+  document.getElementById('tpStart').textContent=s;
+  document.getElementById('tpEnd').textContent=e;
+}
+
+function validateForm(){
+  const name=document.getElementById('fName').value.trim();
+  const car=document.getElementById('fCar').value.trim();
+  const job=document.getElementById('fJob').value;
+  const endMins=selectedStart+selectedDur;
+  const msgEl=document.getElementById('conflictMsg');
+  const mechEl=document.getElementById('mechStatus');
+
+  // Bay conflict
+  const bayConflict=hasOverlap(selectedStart,endMins);
+  if(bayConflict){
+    const b=bookings.find(bk=>{
+      const bs=parseDate(bk.date),be=bk.endDate?parseDate(bk.endDate):bs;
+      const td=viewDate||ictToday();
+      const tc=new Date(td.getFullYear(),td.getMonth(),td.getDate());
+      if(!bs||tc<bs||tc>(be||bs)) return false;
+      return selectedStart<bk.endMins&&endMins>bk.startMins;
+    });
+    msgEl.textContent=`⚠ Bay occupied ${b?mins2time(b.startMins)+' – '+mins2time(b.endMins):''} · Choose a different time`;
+    msgEl.style.display='block';
+    document.getElementById('btnConfirm').disabled=true;
+    if(mechEl){mechEl.textContent='';mechEl.style.color='';}
+    return false;
+  }
+  msgEl.style.display='none';
+
+  // Mechanic conflict
+  const mechConflict=checkMechanicConflict(selectedStart,endMins);
+  if(mechEl){
+    if(mechConflict){
+      mechEl.textContent=`⚠ ${mechConflict.mechanics.join(' & ')} already on ${mechConflict.booking.car} ${mins2time(mechConflict.booking.startMins)}–${mins2time(mechConflict.booking.endMins)}`;
+      mechEl.style.color='#ff6666';
+    } else if(selectedMechanics.size>0){
+      mechEl.textContent=`✓ ${[...selectedMechanics].join(', ')} available`;
+      mechEl.style.color='#00c853';
+    } else {
+      mechEl.textContent='';
+      mechEl.style.color='';
+    }
+  }
+
+  // Also update busy states on mechanic buttons
+  updateMechButtons();
+
+  const ok=name&&car&&job&&!mechConflict;
+  document.getElementById('btnConfirm').disabled=!ok;
+  return ok;
+}
+
+// Watch form inputs
+['fName','fCar','fJob','fLocation'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',validateForm);
+  document.getElementById(id).addEventListener('change',validateForm);
+});
+
+function closePanel(){
+  document.getElementById('panelOverlay').classList.remove('open');
+  selectedStart=null;
+}
+
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('panelOverlay')) closePanel();
+}
+
+async function submitBooking(){
+  if(!validateForm()) return;
+  const btn=document.getElementById('btnConfirm');
+  btn.textContent='BOOKING...';
+  btn.disabled=true;
+
+  const d=viewDate||ict();
+  const dateStr=formatBookingDate(d);
+  const startStr=mins2time(selectedStart);
+  const endStr=mins2time(selectedStart+selectedDur);
+  const name=document.getElementById('fName').value.trim();
+  const car=document.getElementById('fCar').value.trim();
+  const job=document.getElementById('fJob').value;
+  const location=document.getElementById('fLocation').value;
+  const pickupStr = selectedPickupDate ? formatBookingDate(selectedPickupDate) : '';
+  const notes=document.getElementById('fNotes').value.trim();
+
+  try{
+    const mechStr=[...selectedMechanics].join(',');
+    const url=`${API}?action=book&secret=${encodeURIComponent(API_SECRET)}&name=${encodeURIComponent(name)}&car=${encodeURIComponent(car)}&job=${encodeURIComponent(job)}&location=${encodeURIComponent(location)}&date=${encodeURIComponent(dateStr)}&start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}&deliveryDate=${encodeURIComponent(pickupStr)}&notes=${encodeURIComponent(notes)}&mechanic=${encodeURIComponent(mechStr)}&t=${Date.now()}`;
+    const res = await fetch(url,{cache:'no-store'});
+    const result = await res.json();
+
+    if(!result.success && result.conflict){
+      // Server rejected — someone else booked same slot
+      btn.textContent='CONFIRM BOOKING';
+      btn.disabled=false;
+      const msg=document.getElementById('conflictMsg');
+      msg.textContent=`⚠ Slot just taken by another booking (${result.message}) — choose a different time`;
+      msg.style.display='block';
+      await refreshData(); // reload to show the new conflicting booking
+      return;
+    }
+
+    // Success
+    bookings.push({
+      _id:'new_'+Date.now(), date:dateStr,
+      name, car, job,
+      startMins:selectedStart,
+      endMins:selectedStart+selectedDur
+    });
+
+    closePanel();
+    showSuccess(car,name,job,startStr,endStr,d);
+    renderTimeline();
+    btn.textContent='CONFIRM BOOKING';
+
+  } catch(e){
+    btn.textContent='CONFIRM BOOKING';
+    btn.disabled=false;
+    alert('Could not connect to server. Check your connection and try again.');
+  }
+}
+
+function showSuccess(car,name,job,start,end,d){
+  document.getElementById('successCard').innerHTML=`
+    <div class="sc-car">${car}</div>
+    <div class="sc-detail">${name} · ${job.replace(/⚡\s*/,'')}</div>
+    <div class="sc-time">${start} → ${end}</div>
+    <div class="sc-detail" style="margin-top:6px">${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</div>
+  `;
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function afterSuccess(){
+  document.getElementById('successOverlay').classList.remove('show');
+  document.getElementById('fName').value='';
+  document.getElementById('fCar').value='';
+  document.getElementById('fJob').value='';
+  resetMechanics();
+  refreshData();
+}
+
+// ── CANCEL BOOKING ───────────────────────────────────
+let cancelRow = null;
+
+// Cancel requires Manager PIN — staff cannot cancel without it
+function openCancelPanel(row) {
+  requestManagerPin(() => _showCancelPanel(row));
+}
+function _showCancelPanel(row) {
+  cancelRow = row;
+  const b = bookings.find(bk => bk._row === row);
+  if (!b) return;
+  document.getElementById('cJobId').textContent = b.jobId || 'No Job ID';
+  document.getElementById('cCar').textContent = b.car;
+  document.getElementById('cCustomer').textContent = b.fullName || b.name;
+  document.getElementById('cJob').textContent = b.job;
+  document.getElementById('cTime').textContent = `${mins2time(b.startMins)} → ${mins2time(b.endMins)}`;
+  const d = viewDate || ict();
+  document.getElementById('cancelSub').textContent = `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('cancelOverlay').classList.add('open');
+}
+
+function closeCancelPanel() {
+  document.getElementById('cancelOverlay').classList.remove('open');
+  cancelRow = null;
+}
+
+function handleCancelOverlayClick(e) {
+  if (e.target === document.getElementById('cancelOverlay')) closeCancelPanel();
+}
+
+async function confirmCancel() {
+  if (!cancelRow) return;
+  const btn = document.getElementById('btnCancel');
+  btn.textContent = 'Cancelling...';
+  btn.style.opacity = '.6';
+  btn.style.pointerEvents = 'none';
+  try {
+    const url = `${API}?action=cancel&row=${cancelRow}&secret=${encodeURIComponent(API_SECRET)}&t=${Date.now()}`;
+    const res = await fetch(url, {cache:'no-store'});
+    const result = await res.json();
+    if (result.success) {
+      closeCancelPanel();
+      await refreshData();
+    } else {
+      alert('Could not cancel: ' + (result.message||'Unknown error'));
+    }
+  } catch(e) {
+    alert('Connection error: ' + e.message);
+  }
+  btn.textContent = '✕ CANCEL THIS BOOKING';
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+// ── PICKUP DATE PICKER ───────────────────────────────
+var _ppY = new Date().getFullYear();
+var _ppM = new Date().getMonth();
+var selectedPickupDate = null;
+
+function togglePickupPicker() {
+  _ppY = (viewDate||ictToday()).getFullYear();
+  _ppM = (viewDate||ictToday()).getMonth();
+  _renderPP();
+  document.getElementById('pickupPickerOverlay').style.display = 'flex';
+}
+function closePickupPicker() {
+  document.getElementById('pickupPickerOverlay').style.display = 'none';
+}
+function _ppMonth(d2) { _ppM+=d2; if(_ppM<0){_ppM=11;_ppY--;}if(_ppM>11){_ppM=0;_ppY++;} _renderPP(); }
+function clearPickupDate() {
+  selectedPickupDate = null;
+  document.getElementById('pickupDateLabel').textContent = 'Same day as appointment';
+  document.getElementById('pickupDateLabel').style.color = 'var(--t2)';
+  closePickupPicker();
+}
+function _renderPP() {
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('ppTitle').textContent = MONTHS[_ppM] + ' ' + _ppY;
+  var first=new Date(_ppY,_ppM,1), last=new Date(_ppY,_ppM+1,0);
+  var startDow=(first.getDay()+6)%7, grid=document.getElementById('ppDays');
+  grid.innerHTML='';
+  for(var i=0;i<startDow;i++){grid.appendChild(document.createElement('div'));}
+  for(var d2=1;d2<=last.getDate();d2++){
+    (function(day){
+      var dt=new Date(_ppY,_ppM,day);
+      var isSel=selectedPickupDate&&dt.toDateString()===selectedPickupDate.toDateString();
+      var btn2=document.createElement('button');
+      btn2.textContent=day;
+      btn2.style.cssText='width:100%;aspect-ratio:1/1;border-radius:50%;border:none;cursor:pointer;font-size:14px;background:'+(isSel?'var(--gold)':'transparent')+';color:'+(isSel?'#000':'var(--t1)')+';min-height:36px;';
+      btn2.onclick=function(){
+        selectedPickupDate=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+        var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        document.getElementById('pickupDateLabel').textContent='Pickup: '+pad(day)+' '+M[_ppM]+' '+_ppY;
+        document.getElementById('pickupDateLabel').style.color='var(--gold)';
+        closePickupPicker();
+      };
+      grid.appendChild(btn2);
+    })(d2);
+  }
+}
+
+// ── TAP CALENDAR PICKER ──────────────────────────────
+var _cpY = new Date().getFullYear();
+var _cpM = new Date().getMonth();
+
+function toggleCalPicker() {
+  var el = document.getElementById('calPickerOverlay');
+  if (!el) return;
+  if (el.style.display === 'flex') {
+    el.style.display = 'none';
+  } else {
+    _renderCalPicker();
+    el.style.display = 'flex';
+  }
+}
+
+function handleCalPickerOverlay(e) {
+  if (e.target && e.target.id === 'calPickerOverlay') {
+    document.getElementById('calPickerOverlay').style.display = 'none';
+  }
+}
+
+function calPickerMonth(delta) {
+  _cpM += delta;
+  if (_cpM < 0)  { _cpM = 11; _cpY--; }
+  if (_cpM > 11) { _cpM = 0;  _cpY++; }
+  _renderCalPicker();
+}
+
+function _renderCalPicker() {
+  var MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+  var title = document.getElementById('calPickerTitle');
+  var grid  = document.getElementById('calPickerDays');
+  if (!title || !grid) return;
+  title.textContent = MONTHS[_cpM] + ' ' + _cpY;
+  var first = new Date(_cpY, _cpM, 1);
+  var last  = new Date(_cpY, _cpM + 1, 0);
+  var startDow = (first.getDay() + 6) % 7; // Mon=0
+  var today = ictToday();
+  grid.innerHTML = '';
+  // blank cells before first day
+  for (var i = 0; i < startDow; i++) {
+    var blank = document.createElement('div');
+    grid.appendChild(blank);
+  }
+  for (var d = 1; d <= last.getDate(); d++) {
+    (function(day) {
+      var dt = new Date(_cpY, _cpM, day);
+      var isSun = dt.getDay() === 0;
+      var isToday = dt.getDate()===today.getDate() && dt.getMonth()===today.getMonth() && dt.getFullYear()===today.getFullYear();
+      var isSel = viewDate && dt.getDate()===viewDate.getDate() && dt.getMonth()===viewDate.getMonth() && dt.getFullYear()===viewDate.getFullYear();
+      // Check if any booking falls on this day (including multi-day)
+      var hasBk = bookings.some(function(b) {
+        var bs = parseDate(b.date);
+        var be = b.endDate ? parseDate(b.endDate) : bs;
+        if (!bs) return false;
+        return dt >= bs && dt <= (be || bs);
+      });
+      var btn = document.createElement('button');
+      btn.textContent = day;
+      btn.style.cssText = [
+        'width:100%;aspect-ratio:1/1;border-radius:50%;border:none;cursor:pointer;',
+        'font-size:14px;font-weight:' + (isToday ? '700' : '400') + ';',
+        'background:' + (isSel ? 'var(--gold)' : isToday ? '#1a2a3a' : 'transparent') + ';',
+        'color:' + (isSel ? '#000' : isSun ? 'var(--t3)' : 'var(--t1)') + ';',
+        'position:relative;transition:background .1s;min-height:36px;'
+      ].join('');
+      if (hasBk && !isSel) {
+        var dot = document.createElement('span');
+        dot.style.cssText = 'position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold);pointer-events:none';
+        btn.appendChild(dot);
+      }
+      if (!isSun) {
+        btn.onclick = function() { selectCalDay(dt); };
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.25';
+      }
+      grid.appendChild(btn);
+    })(d);
+  }
+}
+
+function selectCalDay(dt) {
+  viewDate = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  _cpY = dt.getFullYear();
+  _cpM = dt.getMonth();
+  updateDateLabel();
+  updateDayLabel();
+  document.getElementById('calPickerOverlay').style.display = 'none';
+  refreshData();
+}
+
+function selectToday() {
+  selectCalDay(ictToday());
+}
+
+// Init
+initDate();
+refreshData();
+</script>
+</body>
+</html>
