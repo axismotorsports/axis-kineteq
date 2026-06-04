@@ -1,8 +1,9 @@
 # Ignore everything by default
 *
 
-# Re-allow the deploy folder and this file
+# Re-allow the deploy folder, apps script, and this file
 !.gitignore
+!apps-script-bay-manager.js
 !axis-deploy/
 !axis-deploy/**
 
