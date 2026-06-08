@@ -384,6 +384,15 @@ function checkMgrPin() {
       <label>Duration</label>
       <div class="duration-grid" id="durGrid"></div>
     </div>
+    <div class="field">
+      <label>End Time</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="time" id="fEndTime" step="300"
+          style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--t1);padding:11px 14px;border-radius:8px;font-size:16px;outline:none;transition:border-color .15s;-webkit-appearance:none"
+          oninput="applyCustomEndTime()">
+        <span style="font-size:10px;color:var(--t2);letter-spacing:.5px;white-space:nowrap">tap to change</span>
+      </div>
+    </div>
 
     <div class="conflict-msg" id="conflictMsg"></div>
 
@@ -948,6 +957,25 @@ function applyCustomTime(){
   validateForm();
 }
 
+function applyCustomEndTime(){
+  const val=document.getElementById('fEndTime').value;
+  if(!val) return;
+  const parts=val.split(':');
+  const h=parseInt(parts[0]),m=parseInt(parts[1]);
+  if(isNaN(h)||isNaN(m)) return;
+  let endMins=(h-SH)*60+m;
+  // Clamp to operating hours and ensure end > start
+  if(endMins>(EH-SH)*60) endMins=(EH-SH)*60;
+  if(endMins<=selectedStart) endMins=selectedStart+30;
+  selectedDur=endMins-selectedStart;
+  // Clear active state on duration buttons (none match a custom duration)
+  document.querySelectorAll('.dur-btn').forEach((b,i)=>{
+    b.classList.toggle('active',DURATIONS[i].mins===selectedDur);
+  });
+  updateTimePreview(true); // pass true to skip re-syncing end input (avoid loop)
+  validateForm();
+}
+
 function selectDuration(mins){
   selectedDur=mins;
   document.querySelectorAll('.dur-btn').forEach((b,i)=>{
@@ -957,11 +985,16 @@ function selectDuration(mins){
   validateForm();
 }
 
-function updateTimePreview(){
+function updateTimePreview(skipEndSync){
   const s=mins2time(selectedStart);
   const e=mins2time(selectedStart+selectedDur);
   document.getElementById('tpStart').textContent=s;
   document.getElementById('tpEnd').textContent=e;
+  // Keep end time input in sync
+  if(!skipEndSync){
+    const et=document.getElementById('fEndTime');
+    if(et) et.value=e;
+  }
 }
 
 function validateForm(){
