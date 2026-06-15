@@ -415,6 +415,24 @@ function checkMgrPin() {
       <label>Vehicle — Brand + Model (ยี่ห้อ + รุ่น) *</label>
       <input type="text" id="fCar" placeholder="e.g. BMW M2 F87 · Honda Civic FL5" autocomplete="off">
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field" style="margin-bottom:0">
+        <label>Year (ปีรถ)</label>
+        <input type="number" id="fYear" placeholder="e.g. 2023" min="1980" max="2030" autocomplete="off">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Mileage — KM (เลขไมล์)</label>
+        <input type="number" id="fMileage" placeholder="e.g. 45000" min="0" autocomplete="off">
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>VIN / Chassis No.</label>
+      <input type="text" id="fVin" placeholder="e.g. JH4DC5380SS001234" autocomplete="off" style="letter-spacing:.5px">
+    </div>
+    <div class="field">
+      <label>Last Service Date (ครั้งล่าสุดที่เข้าศูนย์)</label>
+      <input type="text" id="fLastService" placeholder="e.g. Jan 2025 · 3 months ago" autocomplete="off">
+    </div>
     <div class="field">
       <label>Location (สถานที่) *</label>
       <select id="fLocation">
@@ -425,48 +443,34 @@ function checkMgrPin() {
     </div>
     <div class="field">
       <label>Job Type / Task *</label>
-      <select id="fJob">
-        <option value="">— Select job type —</option>
-        <optgroup label="⚡ ZESTEK">
-          <option>⚡ ZESTEK — Steering Wheel Application</option>
-        </optgroup>
-        <optgroup label="🛢️ MOTY'S">
-          <option>🛢️ MOTY'S — Engine Oil Change</option>
-          <option>🛢️ MOTY'S — Gear Oil Service</option>
-          <option>🛢️ MOTY'S — Differential Oil Service</option>
-          <option>🛢️ MOTY'S — Full Oil Package</option>
-        </optgroup>
-        <optgroup label="🏎️ TOM'S">
-          <option>🏎️ TOM'S — Oil Change</option>
-        </optgroup>
-        <optgroup label="Engine">
-          <option>Full Engine Build / Rebuild</option>
-          <option>Engine Swap</option>
-          <option>Turbo / Forced Induction Install</option>
-          <option>Turbo Upgrade</option>
-          <option>ECU Tune / Remap</option>
-          <option>ECU Flash / Quick Tune</option>
-          <option>Custom Wiring / Harness</option>
-        </optgroup>
-        <optgroup label="Suspension & Chassis">
-          <option>Coilover Install</option>
-          <option>Suspension Arms & Links</option>
-          <option>Roll Cage / Chassis Fab</option>
-          <option>Alignment & Corner Weight</option>
-        </optgroup>
-        <optgroup label="Exterior & Wheels">
-          <option>Wheel & Tire Fitting</option>
-          <option>Brake Upgrade</option>
-          <option>Intake & Exhaust Install</option>
-          <option>Bolt-on Performance Parts</option>
-        </optgroup>
-        <optgroup label="Service">
-          <option>Oil & Fluid Service</option>
-          <option>Pre-Track Inspection</option>
-          <option>General Inspection</option>
-          <option>Gauge & Sensor Install</option>
-        </optgroup>
-      </select>
+      <input type="text" id="fJob" list="jobSuggestions" placeholder="Type or pick a job type…" autocomplete="off">
+      <datalist id="jobSuggestions">
+        <option>⚡ ZESTEK — Steering Wheel Application</option>
+        <option>🛢️ MOTY'S — Engine Oil Change</option>
+        <option>🛢️ MOTY'S — Gear Oil Service</option>
+        <option>🛢️ MOTY'S — Differential Oil Service</option>
+        <option>🛢️ MOTY'S — Full Oil Package</option>
+        <option>🏎️ TOM'S — Oil Change</option>
+        <option>Full Engine Build / Rebuild</option>
+        <option>Engine Swap</option>
+        <option>Turbo / Forced Induction Install</option>
+        <option>Turbo Upgrade</option>
+        <option>ECU Tune / Remap</option>
+        <option>ECU Flash / Quick Tune</option>
+        <option>Custom Wiring / Harness</option>
+        <option>Coilover Install</option>
+        <option>Suspension Arms & Links</option>
+        <option>Roll Cage / Chassis Fab</option>
+        <option>Alignment & Corner Weight</option>
+        <option>Wheel & Tire Fitting</option>
+        <option>Brake Upgrade</option>
+        <option>Intake & Exhaust Install</option>
+        <option>Bolt-on Performance Parts</option>
+        <option>Oil & Fluid Service</option>
+        <option>Pre-Track Inspection</option>
+        <option>General Inspection</option>
+        <option>Gauge & Sensor Install</option>
+      </datalist>
     </div>
 
     <div class="field">
@@ -474,7 +478,6 @@ function checkMgrPin() {
       <div class="mech-grid" id="mechGrid">
         <button class="mech-btn" id="mb-Ta"  onclick="toggleMech('Ta')">Ta</button>
         <button class="mech-btn" id="mb-Ben" onclick="toggleMech('Ben')">Ben</button>
-        <button class="mech-btn" id="mb-Na"  onclick="toggleMech('Na')">Na</button>
         <button class="mech-btn" id="mb-Tay" onclick="toggleMech('Tay')">Tay</button>
       </div>
       <div class="mech-status" id="mechStatus"></div>
@@ -581,7 +584,7 @@ let selectedStart = null;
 let selectedDur = 60;
 let viewDate = null;
 let activeLocation = 'gallery'; // 'gallery' | 'moto'
-const MECHANICS = ['Ta','Ben','Na','Tay'];
+const MECHANICS = ['Ta','Ben','Tay'];
 const MEDIA_TEAM = ['Fun','Jay'];
 let selectedMechanics = new Set();
 let selectedMedia = new Set();
@@ -1168,6 +1171,11 @@ function validateForm(){
   document.getElementById(id).addEventListener('input',validateForm);
   document.getElementById(id).addEventListener('change',validateForm);
 });
+// Optional fields — no validation needed, just passive
+['fYear','fMileage','fVin','fLastService'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('change',()=>{});
+});
 
 function closePanel(){
   document.getElementById('panelOverlay').classList.remove('open');
@@ -1193,7 +1201,18 @@ async function submitBooking(){
   const job=document.getElementById('fJob').value;
   const location=document.getElementById('fLocation').value;
   const pickupStr = selectedPickupDate ? formatBookingDate(selectedPickupDate) : '';
-  const notes=document.getElementById('fNotes').value.trim();
+  const baseNotes=document.getElementById('fNotes').value.trim();
+  const year    =document.getElementById('fYear').value.trim();
+  const mileage =document.getElementById('fMileage').value.trim();
+  const vin     =document.getElementById('fVin').value.trim();
+  const lastSvc =document.getElementById('fLastService').value.trim();
+  const extras  =[
+    year     ? `Year: ${year}`       : '',
+    mileage  ? `KM: ${mileage}`      : '',
+    vin      ? `VIN: ${vin}`         : '',
+    lastSvc  ? `Last svc: ${lastSvc}`: '',
+  ].filter(Boolean).join(' · ');
+  const notes = [baseNotes, extras].filter(Boolean).join(' | ');
 
   try{
     const mechStr=[...selectedMechanics].join(',');
