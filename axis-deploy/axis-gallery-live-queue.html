@@ -506,6 +506,7 @@ async function loadFromSheets() {
         job:      String(r[K_JOB]  || 'Service'),
         location: String(r[K_LOC]  || ''),
         mechanic: String(r['Mechanic'] || ''),
+        media:    String(r['Media']    || ''),
         s: parseTime(String(r[K_START] || '')),
         e: parseTime(String(r[K_END]   || ''))
       }))
@@ -597,10 +598,15 @@ function buildColumn(colEl, jobList) {
       ? j.mechanic.split(',').map(m=>m.trim()).filter(Boolean)
           .map(m=>`<span style="display:inline-block;background:#1a1a28;border:1px solid #2a2a3a;border-radius:3px;padding:0 5px;font-size:8px;font-weight:700;color:#888;letter-spacing:.5px;margin-right:2px">${m}</span>`).join('')
       : '';
+    const mediaStr = j.media
+      ? j.media.split(',').map(m=>m.trim()).filter(Boolean)
+          .map(m=>`<span style="display:inline-block;background:#1a0a2e;border:1px solid #7c3aed;border-radius:3px;padding:0 5px;font-size:8px;font-weight:700;color:#a78bfa;letter-spacing:.5px;margin-right:2px">📷${m}</span>`).join('')
+      : '';
     card.innerHTML = `
       <div class="jcar" style="font-size:${fs}px">${j.car}</div>
       ${!sm ? `<div class="jcustomer">${j.customer}</div>` : ''}
       ${mechStr && !sm ? `<div style="margin-top:3px">${mechStr}</div>` : ''}
+      ${mediaStr && !sm ? `<div style="margin-top:3px">${mediaStr}</div>` : ''}
       <div class="jbottom">
         <span class="jtag">${j.job.replace(/[⚡🛢️🏎️]\s*/u,'').substring(0, 14)}</span>
         <span class="jtimes">${mins2time(j.s)}→${mins2time(j.e)}</span>

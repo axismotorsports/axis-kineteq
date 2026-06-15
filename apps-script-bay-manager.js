@@ -22,7 +22,8 @@ const COL = {
   delivDate:  10,  // Delivery Date
   notes:      11,  // Notes
   status:     12,  // Status
-  mechanic:   13   // Mechanic (NEW)
+  mechanic:   13,  // Mechanic
+  media:      14   // Media team
 };
 
 const HEADERS = [
@@ -39,7 +40,8 @@ const HEADERS = [
   'Delivery Date',
   'Notes',
   'Status',
-  'Mechanic'
+  'Mechanic',
+  'Media'
 ];
 
 // ── ENTRY POINT ───────────────────────────────────────
@@ -120,6 +122,7 @@ function createBooking(p) {
   const endDate   = p.deliveryDate || '';
   const notes     = p.notes     || '';
   const mechanic  = p.mechanic  || '';
+  const media     = p.media     || '';
 
   const isOffsite = (loc) => {
     const l = (loc || '').toLowerCase();
@@ -197,6 +200,34 @@ function createBooking(p) {
     }
   }
 
+  // ── MEDIA CONFLICT CHECK ──────────────────────────
+  const mediaTeam = media.split(',').map(m => m.trim()).filter(Boolean);
+  if (mediaTeam.length > 0 && newStart !== null && newEndT !== null) {
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (String(row[COL.status]) === 'Cancelled') continue;
+      const rowMedia = String(row[COL.media] || '').split(',').map(m => m.trim()).filter(Boolean);
+      if (rowMedia.length === 0) continue;
+      const shared = mediaTeam.filter(m => rowMedia.includes(m));
+      if (shared.length === 0) continue;
+
+      const rowDate = parseDateVal(row[COL.date]);
+      const rowEndD = row[COL.endDate] ? parseDateVal(row[COL.endDate]) : rowDate;
+      if (!rowDate || !newDate) continue;
+      if (newDate > (rowEndD || rowDate) || newEnd < rowDate) continue;
+
+      const rowStart = parseTimeVal(row[COL.startTime]);
+      const rowEnd   = parseTimeVal(row[COL.endTime]);
+      if (rowStart === null || rowEnd === null) continue;
+      if (newStart < rowEnd && newEndT > rowStart) {
+        return {
+          success: false, conflict: true, mediaConflict: true,
+          message: `${shared.join(' & ')} (media) already assigned: ${row[COL.name]} · ${row[COL.car]} · ${row[COL.startTime]}–${row[COL.endTime]}`
+        };
+      }
+    }
+  }
+
   // ── GENERATE JOB ID  AXIS-DDMMYY-NNN ──────────────
   const now = new Date();
   const dd  = Utilities.formatDate(now, TZ, 'ddMMYY');
@@ -211,7 +242,7 @@ function createBooking(p) {
     dateStr, startStr, endStr,
     endDate, endDate,
     notes, 'Active',
-    mechanic
+    mechanic, media
   ]);
 
   return { success: true, jobId };

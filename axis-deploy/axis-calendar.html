@@ -327,6 +327,7 @@ async function loadAndRender() {
     const K_DEL   = 'Delivery Date';
     const K_NOTES = 'Notes';
     const K_MECH  = 'Mechanic';
+    const K_MEDIA = 'Media';
 
     allJobs = rows
       .filter(r => r[K_DATE] && r['Status'] !== 'Cancelled')
@@ -342,6 +343,7 @@ async function loadAndRender() {
           task: r[K_JOB]  || '',
           location: r[K_LOC] || '',
           mechanic: r[K_MECH] || '',
+          media: r[K_MEDIA] || '',
           startDate, endDate,
           startMins, endMins,
           delivery: r[K_DEL] || '',
@@ -377,7 +379,8 @@ function renderJobBlock(job, showId=true) {
   const tStart = job.startMins !== null ? `${pad(Math.floor(job.startMins/60))}:${pad(job.startMins%60)}` : '';
   const tEnd   = job.endMins   !== null ? `${pad(Math.floor(job.endMins/60))}:${pad(job.endMins%60)}`   : '';
   const timeStr = tStart && tEnd ? `${tStart}–${tEnd}` : '';
-  const mechStr = job.mechanic ? job.mechanic.split(',').map(m=>m.trim()).filter(Boolean).join(' · ') : '';
+  const mechStr  = job.mechanic ? job.mechanic.split(',').map(m=>m.trim()).filter(Boolean).join(' · ') : '';
+  const mediaStr = job.media    ? job.media.split(',').map(m=>m.trim()).filter(Boolean).join(' · ') : '';
   return `
     <div class="job-block" style="background:${c.bg};border-left:2.5px solid ${c.border};color:${c.text}">
       ${showId && job.id ? `<span class="job-id-badge">${job.id}</span>` : ''}
@@ -386,7 +389,8 @@ function renderJobBlock(job, showId=true) {
       <div class="jtask">${job.task}</div>
       <span class="loc-badge" style="${locBadgeStyle(job.location)}">${job.location||'AXIS'}</span>
       ${timeStr ? `<div class="jtime">${timeStr}</div>` : ''}
-      ${mechStr ? `<div class="mech-badge">👤 ${mechStr}</div>` : ''}
+      ${mechStr  ? `<div class="mech-badge">👤 ${mechStr}</div>` : ''}
+      ${mediaStr ? `<div class="mech-badge" style="background:rgba(124,58,237,.1);color:#7c3aed;border-left:2px solid #7c3aed">📷 ${mediaStr}</div>` : ''}
     </div>`;
 }
 
