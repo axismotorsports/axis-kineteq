@@ -62,10 +62,11 @@ function doGet(e) {
 
   let result;
   try {
-    if      (action === 'book')   result = createBooking(params);
-    else if (action === 'cancel') result = cancelBooking(params);
-    else if (action === 'seed')   result = seedAll(params);
-    else                          result = getBookings();
+    if      (action === 'book')         result = createBooking(params);
+    else if (action === 'cancel')       result = cancelBooking(params);
+    else if (action === 'seed')         result = seedAll(params);
+    else if (action === 'syncCalendar') result = syncAllToCalendar();
+    else                                result = getBookings();
   } catch(err) {
     result = { success: false, message: String(err) };
   }
@@ -245,6 +246,14 @@ function createBooking(p) {
     mechanic, media
   ]);
 
+  // Sync new booking to Google Calendar (non-blocking)
+  try {
+    syncBookingToCalendar({
+      jobId, name, car, jobType, location,
+      dateStr, startStr, endStr, mechanic, media
+    });
+  } catch(e) { /* calendar sync failure never blocks booking */ }
+
   return { success: true, jobId };
 }
 
@@ -254,7 +263,166 @@ function cancelBooking(p) {
   if (!row || isNaN(row)) return { success: false, message: 'No row specified' };
   const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
   sheet.getRange(row, COL.status + 1).setValue('Cancelled');
+
+  // Remove from Google Calendar
+  try {
+    const jobId = sheet.getRange(row, COL.jobId + 1).getValue();
+    if (jobId) removeBookingFromCalendar(String(jobId));
+  } catch(e) {}
+
   return { success: true };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  GOOGLE CALENDAR SYNC — "Mechanic Booking" layer
+//  Calendar ID is stored in Script Properties after first run.
+//  Event IDs are stored as  cal_AXIS-XXXXXX-NNN  in Script Properties.
+// ═══════════════════════════════════════════════════════════════════
+
+function getOrCreateMechanicCalendar() {
+  const props = PropertiesService.getScriptProperties();
+  let calId = props.getProperty('MECHANIC_CAL_ID');
+
+  if (calId) {
+    try {
+      return CalendarApp.getCalendarById(calId);
+    } catch(e) { /* calendar was deleted — recreate */ }
+  }
+
+  // Create fresh calendar
+  const cal = CalendarApp.createCalendar('Mechanic Booking', {
+    timeZone: TZ,
+    color: CalendarApp.Color.CYAN
+  });
+  props.setProperty('MECHANIC_CAL_ID', cal.getId());
+  return cal;
+}
+
+// Build a JS Date from "dd/MM/yyyy" + "HH:mm"
+function buildDateTime_(dateStr, timeStr) {
+  const dp = String(dateStr).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  const tp = String(timeStr).match(/^(\d{1,2}):(\d{2})/);
+  if (!dp || !tp) return null;
+  return new Date(+dp[3], +dp[2]-1, +dp[1], +tp[1], +tp[2], 0);
+}
+
+// Clean location label for calendar (strip emoji + path prefix)
+function cleanLocation_(loc) {
+  return String(loc || '')
+    .replace(/🔧\s*/g, '')
+    .replace(/🏁\s*/g, '')
+    .trim();
+}
+
+// Format team list for description
+function formatTeam_(mechanic, media) {
+  const parts = [];
+  if (mechanic) parts.push(mechanic);
+  if (media)    parts.push(media + ' (media)');
+  return parts.join(' · ');
+}
+
+function syncBookingToCalendar(b) {
+  const cal   = getOrCreateMechanicCalendar();
+  const props = PropertiesService.getScriptProperties();
+  const key   = 'cal_' + b.jobId;
+
+  const start = buildDateTime_(b.dateStr, b.startStr);
+  const end   = buildDateTime_(b.dateStr, b.endStr);
+  if (!start || !end) return;
+
+  const title = (b.name || '?') + ' — ' + (b.car || '?');
+  const team  = formatTeam_(b.mechanic, b.media);
+  const desc  = [
+    b.jobId,
+    b.jobType || '',
+    team ? 'Team: ' + team : ''
+  ].filter(Boolean).join('\n');
+  const loc   = cleanLocation_(b.location);
+
+  // Update existing event if we have its ID
+  const existingId = props.getProperty(key);
+  if (existingId) {
+    try {
+      const ev = cal.getEventById(existingId);
+      if (ev) {
+        ev.setTitle(title);
+        ev.setTime(start, end);
+        ev.setDescription(desc);
+        ev.setLocation(loc);
+        return;
+      }
+    } catch(e) { /* event gone, fall through to create */ }
+  }
+
+  // Create new event
+  const ev = cal.createEvent(title, start, end, {
+    description: desc,
+    location:    loc
+  });
+  props.setProperty(key, ev.getId());
+}
+
+function removeBookingFromCalendar(jobId) {
+  const props = PropertiesService.getScriptProperties();
+  const key   = 'cal_' + jobId;
+  const evId  = props.getProperty(key);
+  if (!evId) return;
+  try {
+    const cal = getOrCreateMechanicCalendar();
+    const ev  = cal.getEventById(evId);
+    if (ev) ev.deleteEvent();
+  } catch(e) {}
+  props.deleteProperty(key);
+}
+
+// ── Full resync: wipe calendar and rebuild from all Active rows ──
+// Run this once manually from Apps Script editor after deploying.
+function syncAllToCalendar() {
+  const cal   = getOrCreateMechanicCalendar();
+  const props = PropertiesService.getScriptProperties();
+
+  // Delete all existing events in the calendar (past 365 days → next 365 days)
+  const past   = new Date();  past.setFullYear(past.getFullYear() - 1);
+  const future = new Date(); future.setFullYear(future.getFullYear() + 1);
+  const events = cal.getEvents(past, future);
+  events.forEach(ev => { try { ev.deleteEvent(); } catch(e) {} });
+
+  // Clear stored event IDs
+  const allProps = props.getProperties();
+  Object.keys(allProps).forEach(k => { if (k.startsWith('cal_')) props.deleteProperty(k); });
+
+  // Re-push all Active bookings
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+  const data  = sheet.getDataRange().getValues();
+  let count   = 0;
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (String(row[COL.status]) === 'Cancelled') continue;
+    const dateStr = row[COL.date] instanceof Date
+      ? Utilities.formatDate(row[COL.date], TZ, 'dd/MM/yyyy')
+      : String(row[COL.date]);
+    const startStr = row[COL.startTime] instanceof Date
+      ? Utilities.formatDate(new Date(row[COL.startTime].getTime() + 7*3600000), 'UTC', 'HH:mm')
+      : String(row[COL.startTime]);
+    const endStr = row[COL.endTime] instanceof Date
+      ? Utilities.formatDate(new Date(row[COL.endTime].getTime() + 7*3600000), 'UTC', 'HH:mm')
+      : String(row[COL.endTime]);
+    try {
+      syncBookingToCalendar({
+        jobId:    String(row[COL.jobId]),
+        name:     String(row[COL.name]),
+        car:      String(row[COL.car]),
+        jobType:  String(row[COL.jobType]),
+        location: String(row[COL.location]),
+        mechanic: String(row[COL.mechanic] || ''),
+        media:    String(row[COL.media]    || ''),
+        dateStr, startStr, endStr
+      });
+      count++;
+    } catch(e) {}
+  }
+  return { synced: count };
 }
 
 // ── DATE / TIME HELPERS ───────────────────────────────
