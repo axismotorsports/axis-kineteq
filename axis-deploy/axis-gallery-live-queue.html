@@ -194,27 +194,17 @@ body{display:flex;flex-direction:column}
 
 <!-- LOCATION TABS -->
 <div class="loc-tabs">
-  <button class="loc-tab active" id="tab-all"     onclick="setFilter('all')">⬛ All Locations</button>
-  <button class="loc-tab"        id="tab-gallery" onclick="setFilter('gallery')">🏛️ Axis Gallery</button>
-  <button class="loc-tab"        id="tab-moto"    onclick="setFilter('moto')">🔧 Axis Motorsports</button>
+  <button class="loc-tab active" id="tab-moto" onclick="setFilter('moto')">🔧 Axis Motorsports</button>
 </div>
 
 <div class="main">
   <div class="tl-wrap">
 
-    <!-- Column headers (not scrolled, hidden in single-location mode) -->
-    <div class="col-hdrs-row" id="colHdrsRow">
-      <div class="col-hdr-spacer"></div>
-      <div class="col-hdr-label" id="colHdrLeft">🏛️ AXIS GALLERY · RAMA 9</div>
-      <div class="col-hdr-label right" id="colHdrRight">🔧 AXIS MOTORSPORTS</div>
-    </div>
-
     <!-- Scrollable timeline -->
     <div class="tl-scroll" id="tlScroll">
       <div class="tl-labels" id="tlLabels"></div>
       <div class="schedule-wrap" id="schedWrap">
-        <div class="schedule" id="schedGallery"></div>
-        <div class="schedule col-right" id="schedMoto"></div>
+        <div class="schedule" id="schedMoto"></div>
         <!-- Single timebar spans entire wrap -->
         <div class="timebar" id="timebar" style="display:none">
           <div class="timebar-dot"></div>
@@ -299,7 +289,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwvEG-5Mh6XwC0PqKBHLQvb
 const RELOAD_INTERVAL = 60000;
 
 let viewingDate = null;
-let currentFilter = 'all'; // 'all' | 'gallery' | 'moto'
+let currentFilter = 'moto';
 let galleryJobs = [];
 let motoJobs    = [];
 let offsiteJobs = [];
@@ -394,36 +384,15 @@ function isViewingFuture() {
 
 // ── LOCATION FILTER TABS ─────────────────────────────
 function setFilter(f) {
-  currentFilter = f;
-  ['all','gallery','moto'].forEach(id =>
-    document.getElementById('tab-' + id).classList.toggle('active', id === f)
-  );
+  currentFilter = 'moto';
+  document.getElementById('tab-moto').classList.add('active');
   applyFilterLayout();
   tick();
 }
 
 function applyFilterLayout() {
-  const gCol     = document.getElementById('schedGallery');
-  const mCol     = document.getElementById('schedMoto');
-  const hdrsRow  = document.getElementById('colHdrsRow');
-  const colLeft  = document.getElementById('colHdrLeft');
-  const colRight = document.getElementById('colHdrRight');
-
-  if (currentFilter === 'all') {
-    gCol.style.display    = '';
-    mCol.style.display    = '';
-    mCol.style.borderLeft = '1px solid var(--border)';
-    hdrsRow.style.display = 'flex';
-  } else if (currentFilter === 'gallery') {
-    gCol.style.display    = '';
-    mCol.style.display    = 'none';
-    hdrsRow.style.display = 'none';
-  } else { // moto
-    gCol.style.display    = 'none';
-    mCol.style.display    = '';
-    mCol.style.borderLeft = 'none';
-    hdrsRow.style.display = 'none';
-  }
+  const mCol = document.getElementById('schedMoto');
+  if (mCol) { mCol.style.display = ''; mCol.style.borderLeft = 'none'; }
 }
 
 // ── DATE NAVIGATION ──────────────────────────────────
@@ -513,16 +482,14 @@ async function loadFromSheets() {
       .filter(j => j.s !== null && j.e !== null)
       .sort((a, b) => a.s - b.s);
 
-    galleryJobs  = allParsed.filter(j => isLocGallery(j.location));
+    galleryJobs  = [];
     motoJobs     = allParsed.filter(j => isLocMoto(j.location));
-    offsiteJobs  = allParsed.filter(j =>
-      !isLocGallery(j.location) && !isLocMoto(j.location)
-    );
+    offsiteJobs  = allParsed.filter(j => !isLocMoto(j.location));
 
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const dateLabel = `${target.getDate()} ${months[target.getMonth()]} ${target.getFullYear()}`;
-    const totalBay = galleryJobs.length + motoJobs.length;
-    dbg.textContent = `● Gallery: ${galleryJobs.length} · Motorsports: ${motoJobs.length} · Off-site: ${offsiteJobs.length} · ${dateLabel} · ${pad(ict().getHours())}:${pad(ict().getMinutes())}`;
+    const totalBay = motoJobs.length;
+    dbg.textContent = `● Motorsports: ${motoJobs.length} · Off-site: ${offsiteJobs.length} · ${dateLabel} · ${pad(ict().getHours())}:${pad(ict().getMinutes())}`;
     dbg.style.color = totalBay > 0 ? '#00c853' : '#888';
     document.getElementById('sourceLabel').textContent =
       `● LIVE · ${totalBay} bay job${totalBay !== 1 ? 's' : ''} · ${dateLabel}`;
@@ -616,8 +583,7 @@ function buildColumn(colEl, jobList) {
 }
 
 function buildSchedule() {
-  buildColumn(document.getElementById('schedGallery'), galleryJobs);
-  buildColumn(document.getElementById('schedMoto'),    motoJobs);
+  buildColumn(document.getElementById('schedMoto'), motoJobs);
   applyFilterLayout();
   scrollToCurrent();
 }
@@ -717,25 +683,20 @@ function tick() {
     return { active, nextJob, done };
   }
 
-  const gState = processColumn(galleryJobs);
   const mState = processColumn(motoJobs);
 
-  // Decide which job set drives the sidebar
-  const primaryJobs  = currentFilter === 'moto' ? motoJobs  : galleryJobs;
-  const primaryState = currentFilter === 'moto' ? mState    : gState;
-  const allBayJobs   = [...galleryJobs, ...motoJobs].sort((a,b)=>a.s-b.s);
-  const totalToday   = currentFilter === 'all' ? allBayJobs.length : primaryJobs.length;
-  const totalDone    = currentFilter === 'all' ? (gState.done + mState.done) : primaryState.done;
+  // Motorsports is the only location
+  const primaryJobs  = motoJobs;
+  const primaryState = mState;
+  const totalToday   = motoJobs.length;
+  const totalDone    = mState.done;
 
   document.getElementById('sJobsTotal').textContent = totalToday;
   document.getElementById('sDone').textContent      = totalDone;
   document.getElementById('sDoneOf').textContent    = ` of ${totalToday}`;
 
-  // Sidebar label
-  const lblMap = { all: 'Live Status', gallery: '🏛️ Gallery Status', moto: '🔧 Motorsports Status' };
-  document.getElementById('sidebarLbl').textContent = lblMap[currentFilter];
-  const curLabel = currentFilter === 'moto' ? 'Currently at Motorsports' : 'Currently in Bay';
-  document.getElementById('curInLbl').textContent = curLabel;
+  document.getElementById('sidebarLbl').textContent = '🔧 Motorsports Status';
+  document.getElementById('curInLbl').textContent = 'Currently at Motorsports';
 
   const bsEl = document.getElementById('sBayStatus');
   const { active } = primaryState;
@@ -770,9 +731,8 @@ function tick() {
     document.getElementById('sProg').style.width = '0%';
   }
 
-  // Next Up — soonest upcoming across relevant job set
-  const relevantJobs = currentFilter === 'all' ? allBayJobs :
-                       currentFilter === 'moto' ? motoJobs : galleryJobs;
+  // Next Up — soonest upcoming
+  const relevantJobs = motoJobs;
   let nextJob = null;
   if (isViewingToday()) {
     nextJob = relevantJobs.find(j => cm < j.s);
@@ -785,7 +745,7 @@ function tick() {
     document.getElementById('nCust').textContent = nextJob.customer;
     document.getElementById('nJob').textContent  = nextJob.job.replace(/⚡\s*/,'').toUpperCase().substring(0, 22);
     document.getElementById('nTime').textContent = mins2time(nextJob.s);
-    const loc = isLocGallery(nextJob.location) ? '🏛️ Gallery' : isLocMoto(nextJob.location) ? '🔧 Motorsports' : nextJob.location;
+    const loc = isLocMoto(nextJob.location) ? '🔧 Motorsports' : nextJob.location;
     document.getElementById('nLoc').textContent = loc;
     if (isViewingToday()) {
       const mu = Math.max(0, Math.round(nextJob.s - cm));
@@ -795,7 +755,7 @@ function tick() {
       document.getElementById('nIn').textContent = '';
     }
   } else if (active) {
-    const loc = isLocGallery(active.location) ? '🏛️ Gallery' : isLocMoto(active.location) ? '🔧 Motorsports' : '';
+    const loc = isLocMoto(active.location) ? '🔧 Motorsports' : '';
     document.getElementById('nCar').textContent   = 'Bay clears at';
     document.getElementById('nCust').textContent  = '';
     document.getElementById('nJob').textContent   = '';
@@ -803,8 +763,7 @@ function tick() {
     document.getElementById('nIn').textContent    = '';
     document.getElementById('nLoc').textContent   = loc;
   } else {
-    const allDone = gState.done + mState.done;
-    document.getElementById('nCar').textContent  = allDone > 0 ? 'All jobs complete' : 'No jobs scheduled';
+    document.getElementById('nCar').textContent  = mState.done > 0 ? 'All jobs complete' : 'No jobs scheduled';
     ['nCust','nJob','nIn','nLoc'].forEach(id => document.getElementById(id).textContent = '');
     document.getElementById('nTime').textContent = '—';
   }

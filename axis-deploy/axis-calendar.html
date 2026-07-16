@@ -170,7 +170,7 @@ h1 span{color:#E53E3E}
 <div class="page">
   <div class="header">
     <div>
-      <div class="company">Kineteq Group · Axis Motorsports · Axis Gallery</div>
+      <div class="company">Kineteq Group · Axis Motorsports</div>
       <h1 id="monthTitle">— <span>—</span></h1>
     </div>
     <div class="header-right">
@@ -224,8 +224,6 @@ const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT'
 const LOC_COLORS = {
   'motorsports': { bg:'#EBF4FF', border:'#3182CE', text:'#1a4a7a',
     badge_bg:'rgba(49,130,206,0.15)', badge_color:'#1a4a80', badge_border:'#3182CE', label:'Motorsports' },
-  'gallery':     { bg:'#FFF5F5', border:'#E53E3E', text:'#7a1a1a',
-    badge_bg:'rgba(229,62,62,0.13)', badge_color:'#9b1c1c', badge_border:'#E53E3E', label:'Gallery' },
   'offsite':     { bg:'#F7FAFC', border:'#718096', text:'#2d3748',
     badge_bg:'rgba(113,128,150,0.12)', badge_color:'#2d3748', badge_border:'#718096', label:'Off-site' },
 };
@@ -254,8 +252,7 @@ function getJobColor(job) {
 function detectLoc(location) {
   if (!location) return 'motorsports';
   const l = location.toLowerCase();
-  if (l.includes('gallery') || l.includes('rama')) return 'gallery';
-  if (l.includes('off') || l.includes('off-site') || l.includes('ayutthaya') || l.includes('hunter')) return 'offsite';
+  if (l.includes('off') || l.includes('off-site') || l.includes('ayutthaya') || l.includes('hunter') || l.includes('gallery') || l.includes('rama')) return 'offsite';
   return 'motorsports';
 }
 

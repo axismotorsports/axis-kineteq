@@ -335,8 +335,7 @@ function checkMgrPin() {
 
 <!-- LOCATION TABS -->
 <div class="loc-tabs-bar">
-  <button id="ltab-gallery" class="ltab active" onclick="setLocTab('gallery')">🏛️ Gallery</button>
-  <button id="ltab-moto"    class="ltab"        onclick="setLocTab('moto')">🔧 Motorsports</button>
+  <button id="ltab-moto" class="ltab active">🔧 Motorsports</button>
 </div>
 
 <!-- TAP CALENDAR PICKER -->
@@ -436,7 +435,6 @@ function checkMgrPin() {
     <div class="field">
       <label>Location (สถานที่) *</label>
       <select id="fLocation">
-        <option value="🏛️ Gallery — Rama9">🏛️ AXIS Gallery — Rama9</option>
         <option value="🔧 AXIS Motorsports">🔧 AXIS Motorsports</option>
         <option value="Off-site">Off-site</option>
       </select>
@@ -486,8 +484,9 @@ function checkMgrPin() {
     <div class="field">
       <label>📷 Media Team (ทีมสื่อ)</label>
       <div class="media-grid" id="mediaGrid">
-        <button class="media-btn" id="mm-Fun" onclick="toggleMedia('Fun')">Fun</button>
-        <button class="media-btn" id="mm-Jay" onclick="toggleMedia('Jay')">Jay</button>
+        <button class="media-btn" id="mm-Fun"  onclick="toggleMedia('Fun')">Fun</button>
+        <button class="media-btn" id="mm-Jay"  onclick="toggleMedia('Jay')">Jay</button>
+        <button class="media-btn" id="mm-Kong" onclick="toggleMedia('Kong')">Kong</button>
       </div>
       <div class="mech-status" id="mediaStatus"></div>
     </div>
@@ -583,23 +582,17 @@ let bookings = [];
 let selectedStart = null;
 let selectedDur = 60;
 let viewDate = null;
-let activeLocation = 'gallery'; // 'gallery' | 'moto'
+let activeLocation = 'moto';
 const MECHANICS = ['Ta','Ben','Tay'];
-const MEDIA_TEAM = ['Fun','Jay'];
+const MEDIA_TEAM = ['Fun','Jay','Kong'];
 let selectedMechanics = new Set();
 let selectedMedia = new Set();
 
 // ── LOCATION TAB ────────────────────────────────────
 function setLocTab(loc) {
-  activeLocation = loc;
-  document.getElementById('ltab-gallery').classList.toggle('active', loc === 'gallery');
-  document.getElementById('ltab-moto').classList.toggle('active', loc === 'moto');
-  // Pre-set location dropdown to match tab
+  activeLocation = 'moto';
   const sel = document.getElementById('fLocation');
-  if (sel) {
-    if (loc === 'gallery') sel.value = '🏛️ Gallery — Rama9';
-    else sel.value = '🔧 AXIS Motorsports';
-  }
+  if (sel) sel.value = '🔧 AXIS Motorsports';
   renderTimeline();
 }
 
@@ -814,19 +807,17 @@ function hasOverlap(startMins, endMins, exclude=null){
   const today = viewDate || ictToday();
   // Get the location that is currently selected in the form (or fall back to active tab)
   const selEl = document.getElementById('fLocation');
-  const selLoc = selEl ? selEl.value : (activeLocation === 'gallery' ? '🏛️ Gallery — Rama9' : '🔧 AXIS Motorsports');
+  const selLoc = selEl ? selEl.value : '🔧 AXIS Motorsports';
   // Off-site bookings never block a bay
   if(isOffsite(selLoc)) return false;
-  const selIsGallery = isGalleryLoc(selLoc) || (!isMotoLoc(selLoc) && !isOffsite(selLoc));
 
   return bookings.some(b => {
     if(b._id === exclude) return false;
     const bLoc = b.location || '';
     // Off-site bookings don't block any bay
     if(isOffsite(bLoc)) return false;
-    // Location must match — Gallery vs Motorsports are separate bays
-    const bIsGallery = isGalleryLoc(bLoc) || (!isMotoLoc(bLoc) && !isOffsite(bLoc));
-    if(selIsGallery !== bIsGallery) return false;
+    // Both locations are now Motorsports-only; skip cross-location conflicts
+    if(isMotoLoc(selLoc) !== isMotoLoc(bLoc) && !isOffsite(bLoc)) return false;
     // Date range check
     const bStart = parseDate(b.date);
     const bEnd = b.endDate ? parseDate(b.endDate) : bStart;
@@ -935,11 +926,8 @@ function renderTimeline(){
     if(vdClean<bs || vdClean>(be||bs)) return false;
     // Off-site jobs don't appear on bay timeline
     if(isOffsite(b.location||'')) return false;
-    // Location filter — show only the active tab's location
-    const bIsGallery = isGalleryLoc(b.location||'') || (!isMotoLoc(b.location||'') && !isOffsite(b.location||''));
-    if(activeLocation === 'gallery') return bIsGallery;
-    if(activeLocation === 'moto')    return isMotoLoc(b.location||'');
-    return true;
+    // Only show Motorsports bookings on the timeline
+    return isMotoLoc(b.location||'');
   });
 
   for(let m=0;m<(EH-SH)*60;m+=30){
